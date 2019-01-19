@@ -19,6 +19,7 @@ function main() {
     // Initialize functionality
     initListeners(gl, wgl, canvas, render); // Add listeners to the canvas
     initMatrixStack(gl, wgl);               // Setup the stack functionality
+    initController(wgl);                    // Setup controller
 
     // Initialize shaders, models/buffers and gl properties 
     init(gl, wgl);          // Initialize things that can be affected by lost context
@@ -97,9 +98,11 @@ function createRenderFunction(gl, wgl, drawScene) {
             prevFrameTimeStamp = currTime;
         }
         // Handle keypress events
-        handlePressedDownKeys(gl, wgl);
+        handlePressedDownKeys(wgl);
         // Handle mouse movement
         handleMouseMovement(wgl);
+        // Handle controller events
+        handleControllerEvents(wgl);
         // Draw 
         drawScene(gl, wgl, deltaTime);
         // Add to FPS counter
@@ -288,6 +291,7 @@ function initGl(gl, wgl) {
     // Camera movement setup
     wgl.upVec      = vec3.fromValues(0, 1, 0); // Up axis for camera movement
     wgl.rightVec   = vec3.fromValues(1, 0, 0); // Right axis for camera movement
+    wgl.toEyeVec   = vec3.fromValues(0, 0, 1); // Outward axis for camera movement
     wgl.viewMatrix = mat4.create();            // For rotation of view
     wgl.zoomScale  = 1.0;                      // For scaling of view
 }
@@ -366,6 +370,18 @@ function initListeners(gl, wgl, canvas, render) {
 // -------------------------------------------------------------------------------------------------
 // Set up the matrix and matrix stack functionality of the wgl object.
 // -------------------------------------------------------------------------------------------------
+function initController(wgl) {
+    wgl.pxgamepad = new PxGamepad();
+    wgl.pxgamepad.start();
+
+    setInterval(function() {
+        wgl.pxgamepad.update();
+    }, 25);
+}
+
+// -------------------------------------------------------------------------------------------------
+// Set up the matrix and matrix stack functionality of the wgl object.
+// -------------------------------------------------------------------------------------------------
 function initMatrixStack(gl, wgl) {
     wgl.modelViewMatrix  = mat4.create();
     wgl.projectionMatrix = mat4.create();
@@ -412,7 +428,6 @@ function initDrawables(gl, wgl) {
     wgl.listOfOpaqueDrawables = [ cube ];
 }
 
-
 // -------------------------------------------------------------------------------------------------
 // ----------------------------------- Interaction functions ---------------------------------------
 // -------------------------------------------------------------------------------------------------
@@ -441,7 +456,7 @@ function scaleView(wgl, amt) {
 // -------------------------------------------------------------------------------------------------
 // Handle key presses.
 // -------------------------------------------------------------------------------------------------
-function handlePressedDownKeys(gl, wgl) {  
+function handlePressedDownKeys(wgl) {  
     // Zoom functions
     if (wgl.listOfPressedKeys[90]) { // z - zoom in
         scaleView(wgl, 0.1);
@@ -463,6 +478,12 @@ function handlePressedDownKeys(gl, wgl) {
     if (wgl.listOfPressedKeys[40]) { // down
         rotateView(wgl, 5 * Math.PI / 180, wgl.rightVec);
     }  
+    if (wgl.listOfPressedKeys[65]) { // a
+        rotateView(wgl, -5 * Math.PI / 180, wgl.toEyeVec);
+    }
+    if (wgl.listOfPressedKeys[68]) { // d
+        rotateView(wgl, 5 * Math.PI / 180, wgl.toEyeVec);
+    }  
     if (wgl.listOfPressedKeys[82]) { // r - reset camera
         mat4.identity(wgl.viewMatrix);
         wgl.zoomScale = 1.0;
@@ -480,4 +501,18 @@ function handleMouseMovement(wgl) {
     // Rotate accordingly
     rotateView(wgl, dX * Math.PI / 180, wgl.upVec);     // x movement -> rot around up axis
     rotateView(wgl, dY * Math.PI / 180, wgl.rightVec);  // y movement -> rot around right axis
+}
+
+// -------------------------------------------------------------------------------------------------
+// Handle controller events.
+// -------------------------------------------------------------------------------------------------
+function handleControllerEvents(wgl) {
+    // Record change in mouse position
+    var dX = wgl.pxgamepad.rightStick.x;
+    var dY = wgl.pxgamepad.rightStick.y;
+    var dZ = wgl.pxgamepad.leftStick.x;
+    // Rotate accordingly
+    rotateView(wgl, dX * 5 * Math.PI / 180, wgl.upVec);     // x movement -> rot around up axis
+    rotateView(wgl, dY * 5 * Math.PI / 180, wgl.rightVec);  // y movement -> rot around right axis
+    rotateView(wgl, dZ * 5 * Math.PI / 180, wgl.toEyeVec);  // y movement -> rot around right axis
 }
