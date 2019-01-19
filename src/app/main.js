@@ -1,6 +1,13 @@
 // -------------------------------------------------------------------------------------------------
 // Variables for animation.
 // -------------------------------------------------------------------------------------------------
+const defaultZoom = 2.8;
+const aboutY  = [0, 1, 0, 1];
+const aboutX  = [1, 0, 0, 1];
+const aboutZ  = [0, 0, 1, 1];
+const aboutXZ = [1, 0, 1, 0];
+const aboutXY = [1, 1, 0, 0];
+const aboutYZ = [0, 1, 1, 0];
 
 // -------------------------------------------------------------------------------------------------
 // ----------------------------------- Main/Render functions ---------------------------------------
@@ -606,22 +613,40 @@ function handlePressedDownKeys(wgl) {
 
     // Camera movement functions
     if (wgl.listOfPressedKeys[37]) { // left
-        rotateView(wgl, -5 * Math.PI / 180, wgl.upVec);
+        rotateView(wgl, 5 * Math.PI / 180, aboutY);
     } 
     if (wgl.listOfPressedKeys[39]) { // right
-        rotateView(wgl, 5 * Math.PI / 180, wgl.upVec);
+        rotateView(wgl, -5 * Math.PI / 180, aboutY);
     } 
     if (wgl.listOfPressedKeys[38]) { // up
-        rotateView(wgl, -5 * Math.PI / 180, wgl.rightVec);
+        rotateView(wgl, 5 * Math.PI / 180, aboutX);
     }
     if (wgl.listOfPressedKeys[40]) { // down
-        rotateView(wgl, 5 * Math.PI / 180, wgl.rightVec);
+        rotateView(wgl, -5 * Math.PI / 180, aboutX);
     }  
     if (wgl.listOfPressedKeys[65]) { // a
-        rotateView(wgl, -5 * Math.PI / 180, wgl.toEyeVec);
+        rotateView(wgl, -5 * Math.PI / 180, aboutZ);
     }
     if (wgl.listOfPressedKeys[68]) { // d
-        rotateView(wgl, 5 * Math.PI / 180, wgl.toEyeVec);
+        rotateView(wgl, 5 * Math.PI / 180, aboutZ);
+    }  
+    if (wgl.listOfPressedKeys[83]) { // s
+        rotateView(wgl, 5 * Math.PI / 180, aboutXY);
+    }
+    if (wgl.listOfPressedKeys[87]) { // w
+        rotateView(wgl, -5 * Math.PI / 180, aboutXY);
+    }  
+    if (wgl.listOfPressedKeys[73]) { // i
+        rotateView(wgl, -5 * Math.PI / 180, aboutXZ);
+    }
+    if (wgl.listOfPressedKeys[75]) { // k
+        rotateView(wgl, 5 * Math.PI / 180, aboutXZ);
+    }  
+    if (wgl.listOfPressedKeys[74]) { // j
+        rotateView(wgl, -5 * Math.PI / 180, aboutYZ);
+    }
+    if (wgl.listOfPressedKeys[76]) { // l
+        rotateView(wgl, 5 * Math.PI / 180, aboutYZ);
     }  
     if (wgl.listOfPressedKeys[82]) { // r - reset camera
         mat5.identity(wgl.viewMatrix);
@@ -638,8 +663,8 @@ function handleMouseMovement(wgl) {
     var dX = wgl.currX - wgl.prevX;
     var dY = wgl.currY - wgl.prevY;
     // Rotate accordingly
-    rotateView(wgl, dX * Math.PI / 180, wgl.upVec);     // x movement -> rot around up axis
-    rotateView(wgl, dY * Math.PI / 180, wgl.rightVec);  // y movement -> rot around right axis
+    rotateView(wgl, -dX * Math.PI / 180, [0, 1, 0, 1]);  // x movement -> rot around up axis
+    rotateView(wgl, -dY * Math.PI / 180, [1, 0, 0, 1]);  // y movement -> rot around right axis
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -650,8 +675,15 @@ function handleControllerEvents(wgl) {
     var dX = wgl.pxgamepad.rightStick.x;
     var dY = wgl.pxgamepad.rightStick.y;
     var dZ = wgl.pxgamepad.leftStick.x;
+    var dXY = wgl.pxgamepad.leftStick.y;
+    var dXZ = wgl.pxgamepad.dpad.y;
+    var dYZ = wgl.pxgamepad.dpad.x;
+
     // Rotate accordingly
-    rotateView(wgl, dX * 5 * Math.PI / 180, wgl.upVec);     // x movement -> rot around up axis
-    rotateView(wgl, dY * 5 * Math.PI / 180, wgl.rightVec);  // y movement -> rot around right axis
-    rotateView(wgl, dZ * 5 * Math.PI / 180, wgl.toEyeVec);  // y movement -> rot around right axis
+    rotateView(wgl, dX * 5 * Math.PI / 180, aboutY);
+    rotateView(wgl, dY * 5 * Math.PI / 180, aboutX);  
+    rotateView(wgl, dZ * 5 * Math.PI / 180, aboutZ);  
+    rotateView(wgl, dXZ * 5 * Math.PI / 180, aboutXZ); 
+    rotateView(wgl, dXY * 5 * Math.PI / 180, aboutXY); 
+    rotateView(wgl, dYZ * 5 * Math.PI / 180, aboutYZ); 
 }
