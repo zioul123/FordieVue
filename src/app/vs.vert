@@ -28,6 +28,8 @@ const vsSource = `
         aIs4d; uFocalLength;
         if (aIs4d < 0.0) {
             gl_Position = uPMatrix * uMVMatrix1 * aVertexPosition;
+            // Points are sized from 2 to 10
+            gl_PointSize = (gl_Position.z + 1.5) / 3.0 * 8.0 + 2.0;
         } else {
             float x = aVertexPosition.x;
             float y = aVertexPosition.y;
@@ -51,7 +53,10 @@ const vsSource = `
                                        newZ * perspFactor,
                                        1.0); // Now discard w component
             gl_Position = uPMatrix * vertexPosition;
+            // Points are sized from 2 to 10
+            gl_PointSize = (vertexPosition.z + 1.5) / 3.0 * 8.0 + 2.0;
         }
         vColor = aVertexColor;
+
     }
 `;
