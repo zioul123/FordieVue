@@ -597,7 +597,14 @@ function scaleView(wgl, amt) {
     } else {
         wgl.zoomScale = Math.max(wgl.zoomScale + amt, 0.1);
     }
-    console.log(wgl.zoomScale);
+}
+
+// -------------------------------------------------------------------------------------------------
+// Resets the camera.
+// -------------------------------------------------------------------------------------------------
+function resetCamera(wgl) {
+    mat5.identity(wgl.viewMatrix);
+    wgl.zoomScale = defaultZoom;    
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -650,8 +657,7 @@ function handlePressedDownKeys(wgl) {
         rotateView(wgl, 5 * Math.PI / 180, aboutYZ);
     }  
     if (wgl.listOfPressedKeys[82]) { // r - reset camera
-        mat5.identity(wgl.viewMatrix);
-        wgl.zoomScale = defaultZoom;
+        resetCamera(wgl);
     } 
 }
 
@@ -687,4 +693,16 @@ function handleControllerEvents(wgl) {
     rotateView(wgl, dXZ * 2 * Math.PI / 180, aboutXZ); 
     rotateView(wgl, dXY * 5 * Math.PI / 180, aboutXY); 
     rotateView(wgl, dYZ * 2 * Math.PI / 180, aboutYZ); 
+
+    // Zoom functions
+    if (wgl.pxgamepad.buttons.leftTop || wgl.pxgamepad.buttons.rightTop) { // zoom in
+        scaleView(wgl, 0.1);
+    } 
+    if (wgl.pxgamepad.buttons.leftTrigger || wgl.pxgamepad.buttons.rightTrigger) { // zoom out
+        scaleView(wgl, -0.1);
+    } 
+    // Reset camera
+    if (wgl.pxgamepad.buttons.y) { 
+        resetCamera(wgl);
+    } 
 }
