@@ -2,6 +2,7 @@
 // Variables for animation.
 // -------------------------------------------------------------------------------------------------
 const defaultZoom = 2.3;
+const defaultFovy = 60 / 180 * Math.PI;
 const aboutY  = [0, 1, 0, 1];
 const aboutX  = [1, 0, 0, 1];
 const aboutZ  = [0, 0, 1, 1];
@@ -45,7 +46,17 @@ function drawScene(gl, wgl, deltaTime) {
     gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
     
-    // No changes to projection matrix in this program
+    // Projection matrix
+    const tanFovy =  Math.tan(wgl.fovy); 
+    wgl.projectionMatrix = mat4.fromValues(
+        // Transposed matrix notation
+        tanFovy,             0,              0,               0,
+             0,        tanFovy,              0,               0,
+             0,              0,             -1,              -1, 
+             0,              0,  1/focalLength,               1,
+    );
+    mat4.translate(wgl.projectionMatrix, wgl.projectionMatrix, [0, 0, -focalLength]);
+
     
     // Model view matrix
     mat5.identity(wgl.modelViewMatrix); // Reset to identity
@@ -53,8 +64,10 @@ function drawScene(gl, wgl, deltaTime) {
     mat5.translate(wgl.modelViewMatrix, wgl.modelViewMatrix, [0, 0, 0, -wgl.focalLength]);
     // Final changes made based on input
     mat5.multiply(wgl.modelViewMatrix, wgl.modelViewMatrix, wgl.viewMatrix); // Rotation
+    // Scale for visibility. If this is not done, 4d rotation is not clear.
     mat5.scale(wgl.modelViewMatrix, wgl.modelViewMatrix,                     // Scale
                [ wgl.zoomScale, wgl.zoomScale, wgl.zoomScale, wgl.zoomScale ])
+
     wgl.uploadPMatrix();
     wgl.uploadMvMatrix();
     
@@ -399,16 +412,7 @@ function initGl(gl, wgl) {
     // For perspective matrix setup
     wgl.focalLength = focalLength = 5;             // Focal length of 5
     gl.uniform1f(wgl.uniformLocations.focalLength, false, focalLength);
-
-    const tan_60 =  1.7320507764816284; // Fovy of 60
-    wgl.projectionMatrix = mat4.fromValues(
-        // Transposed matrix notation
-        tan_60,              0,              0,               0,
-             0,         tan_60,              0,               0,
-             0,              0,             -1,              -1, 
-             0,              0,  1/focalLength,               1,
-    );
-    mat4.translate(wgl.projectionMatrix, wgl.projectionMatrix, [0, 0, -focalLength]);
+    wgl.fovy = defaultFovy;
 
     // Camera movement setup
     wgl.upVec      = vec3.fromValues(0, 1, 0); // Up axis for camera movement
@@ -588,14 +592,14 @@ function rotateView(wgl, rads, axisVec) {
 }
 
 // -------------------------------------------------------------------------------------------------
-// Scales the view.
+// Zooms the view in/out.
 // -------------------------------------------------------------------------------------------------
-function scaleView(wgl, amt) {
-    // Set the zoom scale
-    if (amt >= 0) {
-        wgl.zoomScale = Math.min(wgl.zoomScale + amt, 2.3);
+function zoomView(wgl, amt) {
+    // Zoom in
+    if (amt > 0) {
+        wgl.fovy = Math.min(wgl.fovy + amt, 1.5);
     } else {
-        wgl.zoomScale = Math.max(wgl.zoomScale + amt, 0.1);
+        wgl.fovy = Math.max(wgl.fovy + amt, 0.1);
     }
 }
 
@@ -613,10 +617,10 @@ function resetCamera(wgl) {
 function handlePressedDownKeys(wgl) {  
     // Zoom functions
     if (wgl.listOfPressedKeys[90]) { // z - zoom in
-        scaleView(wgl, 0.1);
+        zoomView(wgl, -0.01);
     } 
     if (wgl.listOfPressedKeys[88]) { // x - zoom out
-        scaleView(wgl, -0.1);
+        zoomView(wgl, 0.01);
     } 
 
     // Camera movement functions
@@ -696,10 +700,10 @@ function handleControllerEvents(wgl) {
 
     // Zoom functions
     if (wgl.pxgamepad.buttons.leftTop || wgl.pxgamepad.buttons.rightTop) { // zoom in
-        scaleView(wgl, 0.1);
+        zoomView(wgl, -0.01);
     } 
     if (wgl.pxgamepad.buttons.leftTrigger || wgl.pxgamepad.buttons.rightTrigger) { // zoom out
-        scaleView(wgl, -0.1);
+        zoomView(wgl, 0.01);
     } 
     // Reset camera
     if (wgl.pxgamepad.buttons.y) { 
