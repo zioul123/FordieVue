@@ -37,10 +37,10 @@ function drawScene(gl, wgl, deltaTime) {
     gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
     
-    mat4.perspective(wgl.projectionMatrix, wgl.fovy, wgl.aspect, wgl.zNear, wgl.zFar);
+    // No changes to projection matrix in this program
     
+    // Model view matrix
     mat4.identity(wgl.modelViewMatrix); // Reset to identity
-    mat4.lookAt(wgl.modelViewMatrix, wgl.eye, wgl.lookAt, wgl.up); // To eye coordinates
     // Final changes made based on input
     mat4.multiply(wgl.modelViewMatrix, wgl.modelViewMatrix, wgl.viewMatrix); // Rotation
     mat4.scale(wgl.modelViewMatrix, wgl.modelViewMatrix,                     // Scale
@@ -274,14 +274,16 @@ function initGl(gl, wgl) {
     // gl.depthFunc(gl.LEQUAL); // Near things obscure far things
 
     // For perspective matrix setup
-    wgl.fovy   = 60 * Math.PI / 180;
-    wgl.aspect = gl.viewportWidth / gl.viewportHeight;
-    wgl.zNear  = 0.1;
-    wgl.zFar   = 100.0;
-
-    wgl.eye    = [ 0,   0, -10 ];
-    wgl.lookAt = [ 0,   0,   0 ];
-    wgl.up     = [ 0,   1,   0 ];
+    const focal_length = 5;             // Focal length of 5
+    const tan_60 =  1.7320507764816284; // Fovy of 60
+    wgl.projectionMatrix = mat4.fromValues(
+        // Transposed matrix notation
+        tan_60,              0,              0,               0,
+             0,         tan_60,              0,               0,
+             0,              0,             -1,              -1, 
+             0,              0, 1/focal_length,               1,
+    );
+    mat4.translate(wgl.projectionMatrix, wgl.projectionMatrix, [0, 0, -focal_length]);
 
     // Camera movement setup
     wgl.upVec      = vec3.fromValues(0, 1, 0); // Up axis for camera movement
