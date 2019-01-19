@@ -1,7 +1,7 @@
 // -------------------------------------------------------------------------------------------------
 // Variables for animation.
 // -------------------------------------------------------------------------------------------------
-const defaultZoom = 2.8;
+const defaultZoom = 2.3;
 const aboutY  = [0, 1, 0, 1];
 const aboutX  = [1, 0, 0, 1];
 const aboutZ  = [0, 0, 1, 1];
@@ -593,10 +593,11 @@ function rotateView(wgl, rads, axisVec) {
 function scaleView(wgl, amt) {
     // Set the zoom scale
     if (amt >= 0) {
-        wgl.zoomScale = Math.min(wgl.zoomScale + amt, 3.5);
+        wgl.zoomScale = Math.min(wgl.zoomScale + amt, 2.3);
     } else {
         wgl.zoomScale = Math.max(wgl.zoomScale + amt, 0.1);
     }
+    console.log(wgl.zoomScale);
 }
 
 // -------------------------------------------------------------------------------------------------
