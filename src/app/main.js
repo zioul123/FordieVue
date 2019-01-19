@@ -271,10 +271,110 @@ function initModels(gl, wgl) {
     }
 
     // ------------------------------------
+    // Tesseract model
+    // ------------------------------------ 
+    tesseractModel = {};
+    // Set up buffers
+    tesseractModel.setupBuffers = function() {
+        // Setup object data
+        tesseractModel.vertexPositionBuffer           = gl.createBuffer();
+        tesseractModel.vertexPositionBufferItemSize   = 4;
+        tesseractModel.vertexPositionBufferNumItems   = 16;
+        tesseractModel.vertexIndexBuffer              = gl.createBuffer();
+        tesseractModel.vertexIndexBufferItemSize      = 1;
+        tesseractModel.vertexIndexBufferRoundNumItems = 64;
+
+        const tessVertexPositions = [
+            // Top face w
+             1.0,  1.0,  1.0,  1.0,
+             1.0,  1.0, -1.0,  1.0,
+            -1.0,  1.0, -1.0,  1.0,
+            -1.0,  1.0,  1.0,  1.0,
+
+            // Bottom face w
+             1.0, -1.0,  1.0,  1.0,
+             1.0, -1.0, -1.0,  1.0,
+            -1.0, -1.0, -1.0,  1.0,
+            -1.0, -1.0,  1.0,  1.0,
+
+            // Top face -w
+             1.0,  1.0,  1.0, -1.0,
+             1.0,  1.0, -1.0, -1.0,
+            -1.0,  1.0, -1.0, -1.0,
+            -1.0,  1.0,  1.0, -1.0,
+
+            // Bottom face -w
+             1.0, -1.0,  1.0, -1.0,
+             1.0, -1.0, -1.0, -1.0,
+            -1.0, -1.0, -1.0, -1.0,
+            -1.0, -1.0,  1.0, -1.0,
+        ];
+        gl.bindBuffer(gl.ARRAY_BUFFER, tesseractModel.vertexPositionBuffer);
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(tessVertexPositions), gl.STATIC_DRAW);
+
+        var w = 8;
+        const tessVertexIndices = [
+            0,  1,    1,  2,    2,  3,    3,  0, // Top w
+            4,  5,    5,  6,    6,  7,    7,  4, // Bot w
+            0,  4,    1,  5,    2,  6,    3,  7, // Connectors of the two squares
+
+            w+0, w+1,  w+1, w+2,  w+2, w+3,  w+3, w+0, // Top -w
+            w+4, w+5,  w+5, w+6,  w+6, w+7,  w+7, w+4, // Bot -w
+            w+0, w+4,  w+1, w+5,  w+2, w+6,  w+3, w+7, // Connectors of the two squares
+
+            0,  8,    1,  9,    2, 10,    3, 11, // Connectors of the two cubes top   
+            4, 12,    5, 13,    6, 14,    7, 15, // Connectors of the two cubes bot
+        ];
+        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, tesseractModel.vertexIndexBuffer);
+        gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(tessVertexIndices), gl.STATIC_DRAW);
+    }
+    tesseractModel.setupBuffers();
+
+    // Set up functions
+    tesseractModel.setupAttributes = function(colors) {
+        // Tell shader that it's 4d
+        {
+            // True
+            gl.disableVertexAttribArray(wgl.attribLocations.is4d);
+            gl.vertexAttrib1f(wgl.attribLocations.is4d, 1.0);     
+        }
+        // Constant color for the cube
+        {
+            var r, g, b, a;
+            if (colors == null) {
+                a = 1.0, r = g = b = 1.0; // white cube
+            } else { 
+                r = colors[0]; g = colors[1]; b = colors[2]; a = colors[3];
+            }
+
+            gl.disableVertexAttribArray(wgl.attribLocations.vertexColor);
+            gl.vertexAttrib4fv(wgl.attribLocations.vertexColor, [ r, g, b, a ]);
+        }
+        // Vertex positions
+        {
+            const stride = 0; const offset = 0; const norm = false; const type = gl.FLOAT;
+
+            gl.enableVertexAttribArray(wgl.attribLocations.vertexPosition);
+            gl.bindBuffer(gl.ARRAY_BUFFER, tesseractModel.vertexPositionBuffer);
+            gl.vertexAttribPointer(wgl.attribLocations.vertexPosition,
+                                   tesseractModel.vertexPositionBufferItemSize,
+                                   type, norm, stride, offset);
+        }
+    }
+    tesseractModel.drawElements = function() {
+        const offset = 0;
+        // Element indices
+        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, tesseractModel.vertexIndexBuffer);
+        gl.drawElements(gl.LINES, tesseractModel.vertexIndexBufferRoundNumItems,
+                        gl.UNSIGNED_SHORT, offset);
+    }
+
+    // ------------------------------------
     // Put all models into wgl
     // ------------------------------------ 
     wgl.models = {
         cube: cubeModel,
+        tesseract: tesseractModel,
     }
 }
 
@@ -435,9 +535,19 @@ function initDrawables(gl, wgl) {
         }
     };
 
+    tesseract = {
+        draw: function(deltaTime) {
+            wgl.models.tesseract.setupAttributes([1.0, 0.2, 0.2, 1.0]);
+            wgl.pushMatrix();
+                wgl.uploadMvMatrix();
+                wgl.models.tesseract.drawElements();
+            wgl.popMatrix();
+        }
+    };
+
     // Put drawables into wgl
     wgl.numberOfDrawables = 1;
-    wgl.listOfOpaqueDrawables = [ cube ];
+    wgl.listOfOpaqueDrawables = [ tesseract ];
 }
 
 // -------------------------------------------------------------------------------------------------
