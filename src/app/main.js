@@ -456,10 +456,10 @@ function handlePressedDownKeys(gl, wgl) {
         rotateView(wgl, 5 * Math.PI / 180, wgl.upVec);
     } 
     if (wgl.listOfPressedKeys[38]) { // up
-        rotateView(wgl, 5 * Math.PI / 180, wgl.rightVec);
+        rotateView(wgl, -5 * Math.PI / 180, wgl.rightVec);
     }
     if (wgl.listOfPressedKeys[40]) { // down
-        rotateView(wgl, -5 * Math.PI / 180, wgl.rightVec);
+        rotateView(wgl, 5 * Math.PI / 180, wgl.rightVec);
     }  
     if (wgl.listOfPressedKeys[82]) { // r - reset camera
         mat4.identity(wgl.viewMatrix);
@@ -477,5 +477,5 @@ function handleMouseMovement(wgl) {
     var dY = wgl.currY - wgl.prevY;
     // Rotate accordingly
     rotateView(wgl, dX * Math.PI / 180, wgl.upVec);     // x movement -> rot around up axis
-    rotateView(wgl, -dY * Math.PI / 180, wgl.rightVec); // y movement -> rot around right axis
+    rotateView(wgl, dY * Math.PI / 180, wgl.rightVec);  // y movement -> rot around right axis
 }
