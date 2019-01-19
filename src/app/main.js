@@ -684,7 +684,7 @@ function handleControllerEvents(wgl) {
     rotateView(wgl, dX * 5 * Math.PI / 180, aboutY);
     rotateView(wgl, dY * 5 * Math.PI / 180, aboutX);  
     rotateView(wgl, dZ * 5 * Math.PI / 180, aboutZ);  
-    rotateView(wgl, dXZ * 5 * Math.PI / 180, aboutXZ); 
+    rotateView(wgl, dXZ * 2 * Math.PI / 180, aboutXZ); 
     rotateView(wgl, dXY * 5 * Math.PI / 180, aboutXY); 
-    rotateView(wgl, dYZ * 5 * Math.PI / 180, aboutYZ); 
+    rotateView(wgl, dYZ * 2 * Math.PI / 180, aboutYZ); 
 }
