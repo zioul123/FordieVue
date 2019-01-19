@@ -41,12 +41,13 @@ function drawScene(gl, wgl, deltaTime) {
     // No changes to projection matrix in this program
     
     // Model view matrix
-    mat4.identity(wgl.modelViewMatrix); // Reset to identity
+    mat5.identity(wgl.modelViewMatrix); // Reset to identity
+    // Set w backward for camera
+    mat5.translate(wgl.modelViewMatrix, wgl.modelViewMatrix, [0, 0, 0, -wgl.focalLength]);
     // Final changes made based on input
-    mat4.multiply(wgl.modelViewMatrix, wgl.modelViewMatrix, wgl.viewMatrix); // Rotation
-    mat4.scale(wgl.modelViewMatrix, wgl.modelViewMatrix,                     // Scale
-               [ wgl.zoomScale, wgl.zoomScale, wgl.zoomScale ])
-
+    mat5.multiply(wgl.modelViewMatrix, wgl.modelViewMatrix, wgl.viewMatrix); // Rotation
+    mat5.scale(wgl.modelViewMatrix, wgl.modelViewMatrix,                     // Scale
+               [ wgl.zoomScale, wgl.zoomScale, wgl.zoomScale, wgl.zoomScale ])
     wgl.uploadPMatrix();
     wgl.uploadMvMatrix();
     
@@ -170,7 +171,8 @@ function initShaders(gl, wgl) {
     const vertexColor        = gl.getAttribLocation(shaderProgram, 'aVertexColor');
     const is4d               = gl.getAttribLocation(shaderProgram, 'aIs4d');
     const focalLength        = gl.getUniformLocation(shaderProgram, 'uFocalLength');
-    const mvMatrix           = gl.getUniformLocation(shaderProgram, 'uMVMatrix');
+    const mvMatrix1          = gl.getUniformLocation(shaderProgram, 'uMVMatrix1');
+    const mvMatrix2          = gl.getUniformLocation(shaderProgram, 'uMVMatrix2');
     const pMatrix            = gl.getUniformLocation(shaderProgram, 'uPMatrix');
 
     // Put the program info in the wgl object
@@ -182,7 +184,8 @@ function initShaders(gl, wgl) {
     };
     wgl.uniformLocations = {
         focalLength: focalLength,
-        mvMatrix:    mvMatrix,
+        mvMatrix1:    mvMatrix1,
+        mvMatrix2:    mvMatrix2,
         pMatrix:     pMatrix,
     };
 }
@@ -387,7 +390,7 @@ function initGl(gl, wgl) {
     // gl.depthFunc(gl.LEQUAL); // Near things obscure far things
 
     // For perspective matrix setup
-    const focalLength = 5;             // Focal length of 5
+    wgl.focalLength = focalLength = 5;             // Focal length of 5
     gl.uniform1f(wgl.uniformLocations.focalLength, false, focalLength);
 
     const tan_60 =  1.7320507764816284; // Fovy of 60
@@ -404,8 +407,8 @@ function initGl(gl, wgl) {
     wgl.upVec      = vec3.fromValues(0, 1, 0); // Up axis for camera movement
     wgl.rightVec   = vec3.fromValues(1, 0, 0); // Right axis for camera movement
     wgl.toEyeVec   = vec3.fromValues(0, 0, 1); // Outward axis for camera movement
-    wgl.viewMatrix = mat4.create();            // For rotation of view
-    wgl.zoomScale  = 1.0;                      // For scaling of view
+    wgl.viewMatrix = mat5.create();            // For rotation of view
+    wgl.zoomScale  = defaultZoom;              // For scaling of view
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -495,13 +498,13 @@ function initController(wgl) {
 // Set up the matrix and matrix stack functionality of the wgl object.
 // -------------------------------------------------------------------------------------------------
 function initMatrixStack(gl, wgl) {
-    wgl.modelViewMatrix  = mat4.create();
+    wgl.modelViewMatrix  = mat5.create();
     wgl.projectionMatrix = mat4.create();
     wgl.modelViewMatrixStack = [];
 
     wgl.pushMatrix = function() {
-        var copyToPush = mat4.create();
-        mat4.copy(copyToPush, wgl.modelViewMatrix);
+        var copyToPush = mat5.create();
+        mat5.copy(copyToPush, wgl.modelViewMatrix);
         wgl.modelViewMatrixStack.push(copyToPush);
     }
     wgl.popMatrix = function() {
@@ -511,7 +514,21 @@ function initMatrixStack(gl, wgl) {
         wgl.modelViewMatrix = wgl.modelViewMatrixStack.pop();
     }
     wgl.uploadMvMatrix = function() {
-        gl.uniformMatrix4fv(wgl.uniformLocations.mvMatrix, false, wgl.modelViewMatrix);
+        let upperLeft   = mat4.create();
+        let bottomRight = mat3.create();
+        var a = wgl.modelViewMatrix;
+
+        upperLeft[0]  = a[0];  upperLeft[1]  = a[1];  upperLeft[2]  = a[2];  upperLeft[3]  = a[3];
+        upperLeft[4]  = a[5];  upperLeft[5]  = a[6];  upperLeft[6]  = a[7];  upperLeft[7]  = a[8];
+        upperLeft[8]  = a[10]; upperLeft[9]  = a[11]; upperLeft[10] = a[12]; upperLeft[11] = a[13];
+        upperLeft[12] = a[15]; upperLeft[13] = a[16]; upperLeft[14] = a[17]; upperLeft[15] = a[18];
+
+        bottomRight[0] = a[4];  bottomRight[1] = a[9];  bottomRight[2] = a[14];
+        bottomRight[3] = a[19]; bottomRight[4] = a[24]; bottomRight[5] = a[23];
+        bottomRight[6] = a[22]; bottomRight[7] = a[21]; bottomRight[8] = a[20];
+
+        gl.uniformMatrix4fv(wgl.uniformLocations.mvMatrix1, false, upperLeft);
+        gl.uniformMatrix3fv(wgl.uniformLocations.mvMatrix2, false, bottomRight);
     }
     wgl.uploadPMatrix  = function() {
         gl.uniformMatrix4fv(wgl.uniformLocations.pMatrix, false, wgl.projectionMatrix);
@@ -553,14 +570,14 @@ function initDrawables(gl, wgl) {
 // -------------------------------------------------------------------------------------------------
 // ----------------------------------- Interaction functions ---------------------------------------
 // -------------------------------------------------------------------------------------------------
-// Rotate the view by the angle around the specified axis vec3.
+// Rotate the view by the angle around the specified axis (plane) vec4.
 // -------------------------------------------------------------------------------------------------
 function rotateView(wgl, rads, axisVec) {
     // Get the rotation matrix
-    var rotation = mat4.create();
-    mat4.fromRotation(rotation, rads, axisVec);
+    var rotation = mat5.create();
+    mat5.fromRotation(rotation, rads, axisVec);
     // Rotate the view matrix
-    mat4.multiply(wgl.viewMatrix, rotation, wgl.viewMatrix);
+    mat5.multiply(wgl.viewMatrix, rotation, wgl.viewMatrix);
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -607,8 +624,8 @@ function handlePressedDownKeys(wgl) {
         rotateView(wgl, 5 * Math.PI / 180, wgl.toEyeVec);
     }  
     if (wgl.listOfPressedKeys[82]) { // r - reset camera
-        mat4.identity(wgl.viewMatrix);
-        wgl.zoomScale = 1.0;
+        mat5.identity(wgl.viewMatrix);
+        wgl.zoomScale = defaultZoom;
     } 
 }
 

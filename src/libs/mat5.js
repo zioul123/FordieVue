@@ -214,7 +214,6 @@ let mat5 = {
     fromRotation: function(out, rad, axis) {
         var s = Math.sin(rad);
         var c = Math.cos(rad);
-        var out = new glMatrix.ARRAY_TYPE(25);
         // x-w axis rotation
         if (axis[0] == 1 && axis[3] == 1) {
             out[0]  = 1; out[1]  = 0; out[2]  = 0; out[3]  = 0; out[4]  = 0;
@@ -251,7 +250,7 @@ let mat5 = {
             out[15] = 0; out[16] = 0; out[17] =-s; out[18] = c; out[19] = 0;
             out[20] = 0; out[21] = 0; out[22] = 0; out[23] = 0; out[24] = 1;
         // x-z axis rotation
-        } else if (axis[1] == 1 && axis[2] == 1) {
+        } else if (axis[0] == 1 && axis[2] == 1) {
             out[0]  = 1; out[1]  = 0; out[2]  = 0; out[3]  = 0; out[4]  = 0;
             out[5]  = 0; out[6]  = c; out[7]  = 0; out[8]  =-s; out[9]  = 0;
             out[10] = 0; out[11] = 0; out[12] = 1; out[13] = 0; out[14] = 0;
