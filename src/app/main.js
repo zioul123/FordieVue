@@ -426,7 +426,7 @@ function rotateView(wgl, rads, axisVec) {
 // Scales the view.
 // -------------------------------------------------------------------------------------------------
 function scaleView(wgl, amt) {
-    // Get the zoom scale
+    // Set the zoom scale
     if (amt >= 0) {
         wgl.zoomScale = Math.min(wgl.zoomScale + amt, 3.5);
     } else {
