@@ -168,6 +168,8 @@ function initShaders(gl, wgl) {
     // Get attribute and uniform locations
     const vertexPosition     = gl.getAttribLocation(shaderProgram, 'aVertexPosition');
     const vertexColor        = gl.getAttribLocation(shaderProgram, 'aVertexColor');
+    const is4d               = gl.getAttribLocation(shaderProgram, 'aIs4d');
+    const focalLength        = gl.getUniformLocation(shaderProgram, 'uFocalLength');
     const mvMatrix           = gl.getUniformLocation(shaderProgram, 'uMVMatrix');
     const pMatrix            = gl.getUniformLocation(shaderProgram, 'uPMatrix');
 
@@ -176,10 +178,12 @@ function initShaders(gl, wgl) {
     wgl.attribLocations  = { 
         vertexPosition: vertexPosition,
         vertexColor:    vertexColor, 
+        is4d:           is4d,
     };
     wgl.uniformLocations = {
-        mvMatrix: mvMatrix,
-        pMatrix:  pMatrix,
+        focalLength: focalLength,
+        mvMatrix:    mvMatrix,
+        pMatrix:     pMatrix,
     };
 }
 
@@ -195,7 +199,7 @@ function initModels(gl, wgl) {
     cubeModel.setupBuffers = function() {
         // Setup object data
         cubeModel.vertexPositionBuffer           = gl.createBuffer();
-        cubeModel.vertexPositionBufferItemSize   = 3;
+        cubeModel.vertexPositionBufferItemSize   = 4;
         cubeModel.vertexPositionBufferNumItems   = 8;
         cubeModel.vertexIndexBuffer              = gl.createBuffer();
         cubeModel.vertexIndexBufferItemSize      = 1;
@@ -203,16 +207,16 @@ function initModels(gl, wgl) {
 
         const cubeVertexPositions = [
             // Top face
-             1.0,  1.0,  1.0,
-             1.0,  1.0, -1.0,
-            -1.0,  1.0, -1.0, 
-            -1.0,  1.0,  1.0,
+             1.0,  1.0,  1.0,  1.0, // w is always 1 for non-4d
+             1.0,  1.0, -1.0,  1.0,
+            -1.0,  1.0, -1.0,  1.0, 
+            -1.0,  1.0,  1.0,  1.0,
 
             // Bottom face
-             1.0, -1.0,  1.0,
-             1.0, -1.0, -1.0,
-            -1.0, -1.0, -1.0,
-            -1.0, -1.0,  1.0,
+             1.0, -1.0,  1.0,  1.0,
+             1.0, -1.0, -1.0,  1.0,
+            -1.0, -1.0, -1.0,  1.0,
+            -1.0, -1.0,  1.0,  1.0,
         ];
         gl.bindBuffer(gl.ARRAY_BUFFER, cubeModel.vertexPositionBuffer);
         gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(cubeVertexPositions), gl.STATIC_DRAW);
@@ -229,6 +233,12 @@ function initModels(gl, wgl) {
 
     // Set up functions
     cubeModel.setupAttributes = function(colors) {
+        // Tell shader that it's NOT 4d
+        {
+            // False
+            gl.disableVertexAttribArray(wgl.attribLocations.is4d);
+            gl.vertexAttrib1f(wgl.attribLocations.is4d, -1.0);     
+        }
         // Constant color for the cube
         {
             var r, g, b, a;
@@ -277,16 +287,18 @@ function initGl(gl, wgl) {
     // gl.depthFunc(gl.LEQUAL); // Near things obscure far things
 
     // For perspective matrix setup
-    const focal_length = 5;             // Focal length of 5
+    const focalLength = 5;             // Focal length of 5
+    gl.uniform1f(wgl.uniformLocations.focalLength, false, focalLength);
+
     const tan_60 =  1.7320507764816284; // Fovy of 60
     wgl.projectionMatrix = mat4.fromValues(
         // Transposed matrix notation
         tan_60,              0,              0,               0,
              0,         tan_60,              0,               0,
              0,              0,             -1,              -1, 
-             0,              0, 1/focal_length,               1,
+             0,              0,  1/focalLength,               1,
     );
-    mat4.translate(wgl.projectionMatrix, wgl.projectionMatrix, [0, 0, -focal_length]);
+    mat4.translate(wgl.projectionMatrix, wgl.projectionMatrix, [0, 0, -focalLength]);
 
     // Camera movement setup
     wgl.upVec      = vec3.fromValues(0, 1, 0); // Up axis for camera movement

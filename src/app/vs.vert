@@ -1,7 +1,9 @@
 const vsSource = `
-    attribute vec3 aVertexPosition;
+    attribute vec4 aVertexPosition;
     attribute vec4 aVertexColor;
+    attribute float aIs4d; // -1.0: false, +1.0: true
 
+    uniform float uFocalLength;
     uniform mat4 uMVMatrix;
     uniform mat4 uPMatrix;
 
