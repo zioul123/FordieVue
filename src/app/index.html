@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <title>Fordy View</title>
+        <meta charset="utf-8">
+    </head> 
+    <body onload = "main();">
+        <style>
+            div.centered {
+                text-align: center;
+            }
+        </style>
+        <div class="centered">
+            <h1>Fordy View</h1>
+            <canvas id="glcanvas" width="480" height="480"></canvas>
+            <p>FPS: <span id="fps">--</span></p>
+            <p>Controls: </p>
+            <p>To be written</p>
+        </div>
+    </body>
+    <script src="../libs/gl-matrix.js"></script>
+    <script src="../libs/webgl-debug.js"></script>
+    <script src="vs.vert"></script>
+    <script src="fs.frag"></script>
+    <script src="main.js"></script>
+</html>
