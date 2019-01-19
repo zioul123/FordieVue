@@ -312,7 +312,7 @@ function initModels(gl, wgl) {
         gl.bindBuffer(gl.ARRAY_BUFFER, tesseractModel.vertexPositionBuffer);
         gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(tessVertexPositions), gl.STATIC_DRAW);
 
-        var w = 8;
+        var w = 8; // Offset for the w-deeper cube
         const tessVertexIndices = [
             0,  1,    1,  2,    2,  3,    3,  0, // Top w
             4,  5,    5,  6,    6,  7,    7,  4, // Bot w
