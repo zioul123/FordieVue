@@ -16,11 +16,13 @@ function main() {
     wgl.fpsCounter = document.getElementById("fps"); // The FPS counter
     const render = createRenderFunction(gl, wgl, drawScene);
 
-    init(gl, wgl); // Initialize shaders, models/buffers and gl properties
-
+    // Initialize functionality
     initListeners(gl, wgl, canvas, render); // Add listeners to the canvas
     initMatrixStack(gl, wgl);               // Setup the stack functionality
-    initDrawables(gl, wgl);                 // Prepare the drawn objects
+
+    // Initialize shaders, models/buffers and gl properties 
+    init(gl, wgl);          // Initialize things that can be affected by lost context
+    initDrawables(gl, wgl); // Prepare the drawn objects
     
     wgl.requestId = requestAnimationFrame(render); // start the render loop
 }
