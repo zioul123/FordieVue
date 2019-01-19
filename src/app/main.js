@@ -306,6 +306,9 @@ function initModels(gl, wgl) {
         tesseractModel.vertexIndexBuffer              = gl.createBuffer();
         tesseractModel.vertexIndexBufferItemSize      = 1;
         tesseractModel.vertexIndexBufferRoundNumItems = 64;
+        tesseractModel.vertexPointBuffer              = gl.createBuffer();
+        tesseractModel.vertexPointBufferItemSize      = 1;
+        tesseractModel.vertexPointBufferRoundNumItems = 16;
 
         const tessVertexPositions = [
             // Top face w
@@ -350,6 +353,13 @@ function initModels(gl, wgl) {
         ];
         gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, tesseractModel.vertexIndexBuffer);
         gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(tessVertexIndices), gl.STATIC_DRAW);
+
+        const tessVertexPointIndices = [
+            0,  1,  2,  3,  4,  5,  6,  7,
+            8,  9, 10, 11, 12, 13, 14, 15,
+        ];
+        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, tesseractModel.vertexPointBuffer);
+        gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(tessVertexPointIndices), gl.STATIC_DRAW);
     }
     tesseractModel.setupBuffers();
 
@@ -389,6 +399,10 @@ function initModels(gl, wgl) {
         // Element indices
         gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, tesseractModel.vertexIndexBuffer);
         gl.drawElements(gl.LINES, tesseractModel.vertexIndexBufferRoundNumItems,
+                        gl.UNSIGNED_SHORT, offset);
+        // Points
+        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, tesseractModel.vertexPointBuffer);
+        gl.drawElements(gl.POINTS, tesseractModel.vertexPointBufferRoundNumItems,
                         gl.UNSIGNED_SHORT, offset);
     }
 
