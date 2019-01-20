@@ -12,7 +12,7 @@ const aboutYZ = [0, 1, 1, 0];
 
 const isRnB   = true; // Whether to use 3d or not
 const is4d    = [ false, false, false, true ] // Square, Cube, Tesseract
-const selectedObj = 0;
+const selectedObj = 2;
 
 // -------------------------------------------------------------------------------------------------
 // ----------------------------------- Main/Render functions ---------------------------------------
@@ -392,6 +392,9 @@ function initModels(gl, wgl) {
         cubeModel.vertexIndexBuffer              = gl.createBuffer();
         cubeModel.vertexIndexBufferItemSize      = 1;
         cubeModel.vertexIndexBufferRoundNumItems = 24;
+        cubeModel.vertexPointBuffer              = gl.createBuffer();
+        cubeModel.vertexPointBufferItemSize      = 1;
+        cubeModel.vertexPointBufferRoundNumItems = 8;
 
         const cubeVertexPositions = [
             // Top face
@@ -416,6 +419,12 @@ function initModels(gl, wgl) {
         ];
         gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, cubeModel.vertexIndexBuffer);
         gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(cubeVertexIndices), gl.STATIC_DRAW);
+
+        const cubePointIndices = [
+            0, 1, 2, 3, 4, 5, 6, 7,
+        ];
+        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, cubeModel.vertexPointBuffer);
+        gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(cubePointIndices), gl.STATIC_DRAW);
     }
     cubeModel.setupBuffers();
 
@@ -455,6 +464,10 @@ function initModels(gl, wgl) {
         // Element indices
         gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, cubeModel.vertexIndexBuffer);
         gl.drawElements(gl.LINES, cubeModel.vertexIndexBufferRoundNumItems,
+                        gl.UNSIGNED_SHORT, offset);
+        // Points
+        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, cubeModel.vertexPointBuffer);
+        gl.drawElements(gl.POINTS, cubeModel.vertexPointBufferRoundNumItems,
                         gl.UNSIGNED_SHORT, offset);
     }
 
