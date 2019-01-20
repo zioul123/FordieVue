@@ -13,6 +13,8 @@ const aboutYZ = [0, 1, 1, 0];
 let isRnB   = true; // Whether to use 3d or not
 const is4d    = [ false, false, false, true ] // Square, Cube, Tesseract
 let selectedObj = 3;
+const selectedObjText = [ "1 Dimensional Line!", "2 Dimensional Square!", 
+                          "3 Dimensional Cube!", "4 Dimensional Hypercube!" ];
 
 // a button pressed
 let aButtonIsDown = false;  // if it was not down, trigger the onPress event, otherwise ignore
@@ -34,6 +36,9 @@ function main() {
     const gl = WebGLDebugUtils.makeDebugContext(createGLContext(canvas)); // Init the GL context
     const wgl = {}; // The object to hold all web gl information
     wgl.fpsCounter = document.getElementById("fps"); // The FPS counter
+    wgl.viewingItem = document.getElementById("viewingItem"); // The viewed item indicator
+    wgl.viewingItem.innerHTML = selectedObjText[selectedObj];
+    
     const render = createRenderFunction(gl, wgl, drawScene);
 
     // Initialize functionality
@@ -879,13 +884,14 @@ function resetCamera(wgl) {
 // -------------------------------------------------------------------------------------------------
 // Switch the current object
 // -------------------------------------------------------------------------------------------------
-function switchObj(incr) {
+function switchObj(wgl, incr) {
     selectedObj += incr;
     if (selectedObj == -1) {
         selectedObj = is4d.length - 1;
     } else if (selectedObj >= is4d.length) {
         selectedObj = 0;
     }
+    wgl.viewingItem.innerHTML = selectedObjText[selectedObj];
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -913,7 +919,7 @@ function handlePressedDownKeys(wgl) {
     if (wgl.listOfPressedKeys[16]) { // shift
         // Only register the first instance 
         if (!shiftIsDown) {
-            switchObj(1);
+            switchObj(wgl, 1);
             resetCamera(wgl);
             shiftIsDown = true;
         }
@@ -921,7 +927,7 @@ function handlePressedDownKeys(wgl) {
     if (wgl.listOfPressedKeys[17]) { // ctrl
         // Only register the first instance 
         if (!ctrlIsDown) {
-            switchObj(-1);
+            switchObj(wgl, -1);
             resetCamera(wgl);
             ctrlIsDown = true;
         }
@@ -1029,7 +1035,7 @@ function handleControllerEvents(wgl) {
     if (wgl.pxgamepad.buttons.x) { 
         // Only register the first instance 
         if (!xButtonIsDown) {
-            switchObj(1);
+            switchObj(wgl, 1);
             resetCamera(wgl);
             wgl.pxgamepad.on('x', function() {
                 xButtonIsDown = false;
@@ -1040,7 +1046,7 @@ function handleControllerEvents(wgl) {
     if (wgl.pxgamepad.buttons.b) { 
         // Only register the first instance 
         if (!bButtonIsDown) {
-            switchObj(-1);
+            switchObj(wgl, -1);
             resetCamera(wgl);
             wgl.pxgamepad.on('b', function() {
                 bButtonIsDown = false;
