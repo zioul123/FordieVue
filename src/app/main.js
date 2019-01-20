@@ -684,22 +684,22 @@ function handlePressedDownKeys(wgl) {
     if (wgl.listOfPressedKeys[68]) { // d
         rotateView(wgl, 5 * Math.PI / 180, aboutZ);
     }  
-    if (wgl.listOfPressedKeys[83]) { // s
+    if (wgl.listOfPressedKeys[83] && is4d[selectedObj]) { // s
         rotateView(wgl, 5 * Math.PI / 180, aboutXY);
     }
-    if (wgl.listOfPressedKeys[87]) { // w
+    if (wgl.listOfPressedKeys[87] && is4d[selectedObj]) { // w
         rotateView(wgl, -5 * Math.PI / 180, aboutXY);
     }  
-    if (wgl.listOfPressedKeys[73]) { // i
+    if (wgl.listOfPressedKeys[73] && is4d[selectedObj]) { // i
         rotateView(wgl, -5 * Math.PI / 180, aboutXZ);
     }
-    if (wgl.listOfPressedKeys[75]) { // k
+    if (wgl.listOfPressedKeys[75] && is4d[selectedObj]) { // k
         rotateView(wgl, 5 * Math.PI / 180, aboutXZ);
     }  
-    if (wgl.listOfPressedKeys[74]) { // j
+    if (wgl.listOfPressedKeys[74] && is4d[selectedObj]) { // j
         rotateView(wgl, -5 * Math.PI / 180, aboutYZ);
     }
-    if (wgl.listOfPressedKeys[76]) { // l
+    if (wgl.listOfPressedKeys[76] && is4d[selectedObj]) { // l
         rotateView(wgl, 5 * Math.PI / 180, aboutYZ);
     }  
     if (wgl.listOfPressedKeys[82]) { // r - reset camera
@@ -736,9 +736,12 @@ function handleControllerEvents(wgl) {
     rotateView(wgl, dX * 5 * Math.PI / 180, aboutY);
     rotateView(wgl, dY * 5 * Math.PI / 180, aboutX);  
     rotateView(wgl, dZ * 5 * Math.PI / 180, aboutZ);  
-    rotateView(wgl, dXZ * 2 * Math.PI / 180, aboutXZ); 
-    rotateView(wgl, dXY * 5 * Math.PI / 180, aboutXY); 
-    rotateView(wgl, dYZ * 2 * Math.PI / 180, aboutYZ); 
+    // Rotate about W IF selected object is 4d compatible
+    if (is4d[selectedObj]) {
+        rotateView(wgl, dXZ * 2 * Math.PI / 180, aboutXZ); 
+        rotateView(wgl, dXY * 5 * Math.PI / 180, aboutXY); 
+        rotateView(wgl, dYZ * 2 * Math.PI / 180, aboutYZ); 
+    }
 
     // Zoom functions
     if (wgl.pxgamepad.buttons.leftTop || wgl.pxgamepad.buttons.rightTop) { // zoom in
