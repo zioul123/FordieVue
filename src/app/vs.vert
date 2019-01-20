@@ -27,9 +27,10 @@ const vsSource = `
     {
         aIs4d; uFocalLength;
         if (aIs4d < 0.0) {
-            gl_Position = uPMatrix * uMVMatrix1 * aVertexPosition;
+            vec4 vertexPos = uMVMatrix1 * aVertexPosition;
+            gl_Position = uPMatrix * vertexPos;
             // Points are sized from 2 to 10
-            gl_PointSize = (gl_Position.z + 1.5) / 3.0 * 8.0 + 2.0;
+            gl_PointSize = (vertexPos.z + 1.5) / 3.0 * 8.0 + 2.0;
         } else {
             float x = aVertexPosition.x;
             float y = aVertexPosition.y;
