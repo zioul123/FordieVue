@@ -10,7 +10,17 @@ const aboutXZ = [1, 0, 1, 0];
 const aboutXY = [1, 1, 0, 0];
 const aboutYZ = [0, 1, 1, 0];
 
-const isRnB   = true; // Whether to use 3d or not
+let isRnB   = true; // Whether to use 3d or not
+const is4d    = [ false, false, false, true ] // Square, Cube, Tesseract
+let selectedObj = 3;
+
+// a button pressed
+let aButtonIsDown = false;  // if it was not down, trigger the onPress event, otherwise ignore
+let xButtonIsDown = false;  // if it was not down, trigger the onPress event, otherwise ignore
+let bButtonIsDown = false;  // if it was not down, trigger the onPress event, otherwise ignore
+let spacebarIsDown = false; // if it was not down, trigger the onPress event, otherwise ignore
+let shiftIsDown = false;    // if it was not down, trigger the onPress event, otherwise ignore
+let ctrlIsDown = false;     // if it was not down, trigger the onPress event, otherwise ignore
 
 // -------------------------------------------------------------------------------------------------
 // ----------------------------------- Main/Render functions ---------------------------------------
@@ -78,9 +88,34 @@ function drawScene(gl, wgl, deltaTime) {
     gl.disable(gl.DEPTH_TEST);
     gl.depthMask(false);
     gl.enable(gl.BLEND);
-    for (let i = 0; i < wgl.numberOfDrawables; i++) {
-        wgl.listOfOpaqueDrawables[i].draw(deltaTime);
-    }
+    wgl.listOfOpaqueDrawables[selectedObj].draw(deltaTime);
+}
+
+// -------------------------------------------------------------------------------------------------
+// Function to draw the object in 3d.
+// -------------------------------------------------------------------------------------------------
+function draw3dObject(wgl, drawable) {
+    // Cyan object
+    drawable.setupAttributes([0.0, 1.0, 1.0, 1.0]);
+    wgl.uploadMvMatrix();
+    mat4.translate(wgl.projectionMatrix, wgl.projectionMatrix, 
+                   [-0.01, 0, 0]);
+    // 0.08 rads is worked out as the angle correction (trial and error)
+    mat4.rotate(wgl.projectionMatrix, wgl.projectionMatrix,
+                0.08, [0, -1, 0]);
+    wgl.uploadPMatrix();
+    drawable.drawElements();
+    // Reverse the rotation and translation to render blue in-place
+    mat4.rotate(wgl.projectionMatrix, wgl.projectionMatrix,
+                0.08, [0, 1, 0]);
+    mat4.translate(wgl.projectionMatrix, wgl.projectionMatrix, 
+                   [0.01, 0, 0]);
+
+    // Red cube
+    drawable.setupAttributes([1.0, 0.0, 0.0, 1.0]);
+    wgl.uploadMvMatrix();
+    wgl.uploadPMatrix();
+    drawable.drawElements();
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -216,6 +251,151 @@ function initShaders(gl, wgl) {
 // -------------------------------------------------------------------------------------------------
 function initModels(gl, wgl) {
     // ------------------------------------
+    // Line model
+    // ------------------------------------ 
+    lineModel = {};
+    // Set up buffers
+    lineModel.setupBuffers = function() {
+        // Setup object data
+        lineModel.vertexPositionBuffer           = gl.createBuffer();
+        lineModel.vertexPositionBufferItemSize   = 4;
+        lineModel.vertexPositionBufferNumItems   = 2;
+        lineModel.vertexIndexBuffer              = gl.createBuffer();
+        lineModel.vertexIndexBufferItemSize      = 1;
+        lineModel.vertexIndexBufferRoundNumItems = 2;
+
+        const lineVertexPositions = [
+             1.0,  0.0,  0.0, 1.0, // w is always 1 for non-4d
+            -1.0,  0.0,  0.0, 1.0,
+        ];
+        gl.bindBuffer(gl.ARRAY_BUFFER, lineModel.vertexPositionBuffer);
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(lineVertexPositions), gl.STATIC_DRAW);
+
+        const lineVertexIndices = [
+            0, 1,
+        ];
+        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, lineModel.vertexIndexBuffer);
+        gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(lineVertexIndices), gl.STATIC_DRAW);
+    }
+    lineModel.setupBuffers();
+
+    // Set up functions
+    lineModel.setupAttributes = function(colors) {
+        // Tell shader that it's NOT 4d
+        {
+            // False
+            gl.disableVertexAttribArray(wgl.attribLocations.is4d);
+            gl.vertexAttrib1f(wgl.attribLocations.is4d, -1.0);     
+        }
+        // Constant color for the line
+        {
+            var r, g, b, a;
+            if (colors == null) {
+                a = 1.0, r = g = b = 1.0; // white line
+            } else { 
+                r = colors[0]; g = colors[1]; b = colors[2]; a = colors[3];
+            }
+
+            gl.disableVertexAttribArray(wgl.attribLocations.vertexColor);
+            gl.vertexAttrib4fv(wgl.attribLocations.vertexColor, [ r, g, b, a ]);
+        }
+        // Vertex positions
+        {
+            const stride = 0; const offset = 0; const norm = false; const type = gl.FLOAT;
+
+            gl.enableVertexAttribArray(wgl.attribLocations.vertexPosition);
+            gl.bindBuffer(gl.ARRAY_BUFFER, lineModel.vertexPositionBuffer);
+            gl.vertexAttribPointer(wgl.attribLocations.vertexPosition,
+                                   lineModel.vertexPositionBufferItemSize,
+                                   type, norm, stride, offset);
+        }
+    }
+    lineModel.drawElements = function() {
+        const offset = 0;
+        // Element indices
+        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, lineModel.vertexIndexBuffer);
+        gl.drawElements(gl.LINE_LOOP, lineModel.vertexIndexBufferRoundNumItems,
+                        gl.UNSIGNED_SHORT, offset);
+        // Points
+        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, lineModel.vertexIndexBuffer);
+        gl.drawElements(gl.POINTS, lineModel.vertexIndexBufferRoundNumItems,
+                        gl.UNSIGNED_SHORT, offset);
+    }
+    // ------------------------------------
+    // Square model
+    // ------------------------------------ 
+    squareModel = {};
+    // Set up buffers
+    squareModel.setupBuffers = function() {
+        // Setup object data
+        squareModel.vertexPositionBuffer           = gl.createBuffer();
+        squareModel.vertexPositionBufferItemSize   = 4;
+        squareModel.vertexPositionBufferNumItems   = 4;
+        squareModel.vertexIndexBuffer              = gl.createBuffer();
+        squareModel.vertexIndexBufferItemSize      = 1;
+        squareModel.vertexIndexBufferRoundNumItems = 4;
+
+        const squareVertexPositions = [
+             1.0,  1.0,  0.0, 1.0, // w is always 1 for non-4d
+             1.0, -1.0,  0.0, 1.0,
+            -1.0, -1.0,  0.0, 1.0, 
+            -1.0,  1.0,  0.0, 1.0,
+        ];
+        gl.bindBuffer(gl.ARRAY_BUFFER, squareModel.vertexPositionBuffer);
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(squareVertexPositions), gl.STATIC_DRAW);
+
+        const squareVertexIndices = [
+            0, 1, 2, 3,
+        ];
+        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, squareModel.vertexIndexBuffer);
+        gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(squareVertexIndices), gl.STATIC_DRAW);
+    }
+    squareModel.setupBuffers();
+
+    // Set up functions
+    squareModel.setupAttributes = function(colors) {
+        // Tell shader that it's NOT 4d
+        {
+            // False
+            gl.disableVertexAttribArray(wgl.attribLocations.is4d);
+            gl.vertexAttrib1f(wgl.attribLocations.is4d, -1.0);     
+        }
+        // Constant color for the square
+        {
+            var r, g, b, a;
+            if (colors == null) {
+                a = 1.0, r = g = b = 1.0; // white square
+            } else { 
+                r = colors[0]; g = colors[1]; b = colors[2]; a = colors[3];
+            }
+
+            gl.disableVertexAttribArray(wgl.attribLocations.vertexColor);
+            gl.vertexAttrib4fv(wgl.attribLocations.vertexColor, [ r, g, b, a ]);
+        }
+        // Vertex positions
+        {
+            const stride = 0; const offset = 0; const norm = false; const type = gl.FLOAT;
+
+            gl.enableVertexAttribArray(wgl.attribLocations.vertexPosition);
+            gl.bindBuffer(gl.ARRAY_BUFFER, squareModel.vertexPositionBuffer);
+            gl.vertexAttribPointer(wgl.attribLocations.vertexPosition,
+                                   squareModel.vertexPositionBufferItemSize,
+                                   type, norm, stride, offset);
+        }
+    }
+    squareModel.drawElements = function() {
+        const offset = 0;
+        // Element indices
+        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, squareModel.vertexIndexBuffer);
+        gl.drawElements(gl.LINE_LOOP, squareModel.vertexIndexBufferRoundNumItems,
+                        gl.UNSIGNED_SHORT, offset);
+        // Points
+        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, squareModel.vertexIndexBuffer);
+        gl.drawElements(gl.POINTS, squareModel.vertexIndexBufferRoundNumItems,
+                        gl.UNSIGNED_SHORT, offset);
+    }
+
+    // ------------------------------------
     // Cube model
     // ------------------------------------ 
     cubeModel = {};
@@ -228,6 +408,9 @@ function initModels(gl, wgl) {
         cubeModel.vertexIndexBuffer              = gl.createBuffer();
         cubeModel.vertexIndexBufferItemSize      = 1;
         cubeModel.vertexIndexBufferRoundNumItems = 24;
+        cubeModel.vertexPointBuffer              = gl.createBuffer();
+        cubeModel.vertexPointBufferItemSize      = 1;
+        cubeModel.vertexPointBufferRoundNumItems = 8;
 
         const cubeVertexPositions = [
             // Top face
@@ -252,6 +435,12 @@ function initModels(gl, wgl) {
         ];
         gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, cubeModel.vertexIndexBuffer);
         gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(cubeVertexIndices), gl.STATIC_DRAW);
+
+        const cubePointIndices = [
+            0, 1, 2, 3, 4, 5, 6, 7,
+        ];
+        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, cubeModel.vertexPointBuffer);
+        gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(cubePointIndices), gl.STATIC_DRAW);
     }
     cubeModel.setupBuffers();
 
@@ -291,6 +480,10 @@ function initModels(gl, wgl) {
         // Element indices
         gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, cubeModel.vertexIndexBuffer);
         gl.drawElements(gl.LINES, cubeModel.vertexIndexBufferRoundNumItems,
+                        gl.UNSIGNED_SHORT, offset);
+        // Points
+        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, cubeModel.vertexPointBuffer);
+        gl.drawElements(gl.POINTS, cubeModel.vertexPointBufferRoundNumItems,
                         gl.UNSIGNED_SHORT, offset);
     }
 
@@ -411,6 +604,8 @@ function initModels(gl, wgl) {
     // Put all models into wgl
     // ------------------------------------ 
     wgl.models = {
+        line: lineModel,
+        square: squareModel,
         cube: cubeModel,
         tesseract: tesseractModel,
     }
@@ -501,6 +696,16 @@ function initListeners(gl, wgl, canvas, render) {
     }
     function handleKeyUp(event) {
         wgl.listOfPressedKeys[event.keyCode] = false;
+        // Reset the repeated-press prone buttons
+        if (event.keyCode == 32) { // Space
+            spacebarIsDown = false;
+        }
+        if (event.keyCode == 16) { // Shift
+            shiftIsDown = false;
+        }
+        if (event.keyCode == 17) { // Ctrl
+            ctrlIsDown = false;
+        }
         // console.log("keyup - keyCode=%d, charCode=%d", event.keyCode, event.charCode);
     }
     function handleKeyPress(event) {} // Doesn't do anything
@@ -567,57 +772,74 @@ function initMatrixStack(gl, wgl) {
 // -------------------------------------------------------------------------------------------------
 function initDrawables(gl, wgl) {
     // ------------------------------------
-    // Instructions to draw cube
+    // Instructions to draw objects
     // ------------------------------------ 
+    line = {
+        draw: function(deltaTime) {
+            if (!isRnB) { // Not 3d
+                wgl.models.line.setupAttributes([1.0, 1.0, 1.0, 1.0]);
+                wgl.pushMatrix();
+                    wgl.uploadMvMatrix();
+                    wgl.models.line.drawElements();
+                wgl.popMatrix();
+            } else { // 3d
+                wgl.pushMatrix();
+                    draw3dObject(wgl, wgl.models.line);
+                wgl.popMatrix();
+            }
+        }
+    };
+    square = {
+        draw: function(deltaTime) {
+            if (!isRnB) { // Not 3d
+                wgl.models.square.setupAttributes([1.0, 1.0, 1.0, 1.0]);
+                wgl.pushMatrix();
+                    wgl.uploadMvMatrix();
+                    wgl.models.square.drawElements();
+                wgl.popMatrix();
+            } else { // 3d
+                wgl.pushMatrix();
+                    draw3dObject(wgl, wgl.models.square);
+                wgl.popMatrix();
+            }
+        }
+    };
+
     cube = {
         draw: function(deltaTime) {
-            wgl.models.cube.setupAttributes([1.0, 1.0, 1.0, 1.0]);
-            wgl.pushMatrix();
-                wgl.uploadMvMatrix();
-                wgl.models.cube.drawElements();
-            wgl.popMatrix();
+            if (!isRnB) { // Not 3d
+                wgl.models.cube.setupAttributes([1.0, 1.0, 1.0, 1.0]);
+                wgl.pushMatrix();
+                    wgl.uploadMvMatrix();
+                    wgl.models.cube.drawElements();
+                wgl.popMatrix();
+            } else { // 3d
+                wgl.pushMatrix();
+                    draw3dObject(wgl, wgl.models.cube);
+                wgl.popMatrix();
+            }
         }
     };
 
     tesseract = {
         draw: function(deltaTime) {
             if (!isRnB) { // Not 3d
-                wgl.models.tesseract.setupAttributes([1.0, 0.2, 0.2, 1.0]);
+                wgl.models.tesseract.setupAttributes([1.0, 1.0, 1.0, 1.0]);
                 wgl.pushMatrix();
                     wgl.uploadMvMatrix();
                     wgl.models.tesseract.drawElements();
                 wgl.popMatrix();
             } else { // 3d
                 wgl.pushMatrix();
-                    // Cyan cube
-                    wgl.models.tesseract.setupAttributes([0.0, 1.0, 1.0, 1.0]);
-                    wgl.uploadMvMatrix();
-                    mat4.translate(wgl.projectionMatrix, wgl.projectionMatrix, 
-                                   [-0.01, 0, 0]);
-                    // 0.01 rads is worked out as the lookat [0,0,0] angle correction
-                    mat4.rotate(wgl.projectionMatrix, wgl.projectionMatrix,
-                                0.08, [0, -1, 0]);
-                    wgl.uploadPMatrix();
-                    wgl.models.tesseract.drawElements();
-                    // Reverse the rotation and translation to render blue in-place
-                    mat4.rotate(wgl.projectionMatrix, wgl.projectionMatrix,
-                                0.08, [0, 1, 0]);
-                    mat4.translate(wgl.projectionMatrix, wgl.projectionMatrix, 
-                                   [0.01, 0, 0]);
-
-                    // Red cube
-                    wgl.models.tesseract.setupAttributes([1.0, 0.0, 0.0, 1.0]);
-                    wgl.uploadMvMatrix();
-                    wgl.uploadPMatrix();
-                    wgl.models.tesseract.drawElements();
+                    draw3dObject(wgl, wgl.models.tesseract);
                 wgl.popMatrix();
             }
         }
     };
 
     // Put drawables into wgl
-    wgl.numberOfDrawables = 1;
-    wgl.listOfOpaqueDrawables = [ tesseract ];
+    wgl.numberOfDrawables = 4;
+    wgl.listOfOpaqueDrawables = [ line, square, cube, tesseract ];
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -651,6 +873,19 @@ function zoomView(wgl, amt) {
 function resetCamera(wgl) {
     mat5.identity(wgl.viewMatrix);
     wgl.zoomScale = defaultZoom;    
+    wgl.fovy = defaultFovy;
+}
+
+// -------------------------------------------------------------------------------------------------
+// Switch the current object
+// -------------------------------------------------------------------------------------------------
+function switchObj(incr) {
+    selectedObj += incr;
+    if (selectedObj == -1) {
+        selectedObj = is4d.length - 1;
+    } else if (selectedObj >= is4d.length) {
+        selectedObj = 0;
+    }
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -663,6 +898,33 @@ function handlePressedDownKeys(wgl) {
     } 
     if (wgl.listOfPressedKeys[88]) { // x - zoom out
         zoomView(wgl, 0.01);
+    } 
+
+    // Toggle 3d
+    if (wgl.listOfPressedKeys[32]) { // space
+        // Only register the first instance 
+        if (!spacebarIsDown) {
+            isRnB = !isRnB;
+            spacebarIsDown = true;
+        }
+    } 
+
+    // Toggle shape
+    if (wgl.listOfPressedKeys[16]) { // shift
+        // Only register the first instance 
+        if (!shiftIsDown) {
+            switchObj(1);
+            resetCamera(wgl);
+            shiftIsDown = true;
+        }
+    } 
+    if (wgl.listOfPressedKeys[17]) { // ctrl
+        // Only register the first instance 
+        if (!ctrlIsDown) {
+            switchObj(-1);
+            resetCamera(wgl);
+            ctrlIsDown = true;
+        }
     } 
 
     // Camera movement functions
@@ -684,22 +946,22 @@ function handlePressedDownKeys(wgl) {
     if (wgl.listOfPressedKeys[68]) { // d
         rotateView(wgl, 5 * Math.PI / 180, aboutZ);
     }  
-    if (wgl.listOfPressedKeys[83]) { // s
+    if (wgl.listOfPressedKeys[83] && is4d[selectedObj]) { // s
         rotateView(wgl, 5 * Math.PI / 180, aboutXY);
     }
-    if (wgl.listOfPressedKeys[87]) { // w
+    if (wgl.listOfPressedKeys[87] && is4d[selectedObj]) { // w
         rotateView(wgl, -5 * Math.PI / 180, aboutXY);
     }  
-    if (wgl.listOfPressedKeys[73]) { // i
+    if (wgl.listOfPressedKeys[73] && is4d[selectedObj]) { // i
         rotateView(wgl, -5 * Math.PI / 180, aboutXZ);
     }
-    if (wgl.listOfPressedKeys[75]) { // k
+    if (wgl.listOfPressedKeys[75] && is4d[selectedObj]) { // k
         rotateView(wgl, 5 * Math.PI / 180, aboutXZ);
     }  
-    if (wgl.listOfPressedKeys[74]) { // j
+    if (wgl.listOfPressedKeys[74] && is4d[selectedObj]) { // j
         rotateView(wgl, -5 * Math.PI / 180, aboutYZ);
     }
-    if (wgl.listOfPressedKeys[76]) { // l
+    if (wgl.listOfPressedKeys[76] && is4d[selectedObj]) { // l
         rotateView(wgl, 5 * Math.PI / 180, aboutYZ);
     }  
     if (wgl.listOfPressedKeys[82]) { // r - reset camera
@@ -733,12 +995,17 @@ function handleControllerEvents(wgl) {
     var dYZ = wgl.pxgamepad.dpad.x;
 
     // Rotate accordingly
-    rotateView(wgl, dX * 5 * Math.PI / 180, aboutY);
-    rotateView(wgl, dY * 5 * Math.PI / 180, aboutX);  
+    rotateView(wgl, dX * -5 * Math.PI / 180, aboutY);
+    rotateView(wgl, dY * -5 * Math.PI / 180, aboutX);  
     rotateView(wgl, dZ * 5 * Math.PI / 180, aboutZ);  
-    rotateView(wgl, dXZ * 2 * Math.PI / 180, aboutXZ); 
-    rotateView(wgl, dXY * 5 * Math.PI / 180, aboutXY); 
-    rotateView(wgl, dYZ * 2 * Math.PI / 180, aboutYZ); 
+    // Rotate about W IF selected object is 4d compatible
+    if (is4d[selectedObj]) {
+        rotateView(wgl, dXZ * 2 * Math.PI / 180, aboutXZ); 
+        rotateView(wgl, dXY * 5 * Math.PI / 180, aboutXY); 
+        rotateView(wgl, dYZ * 2 * Math.PI / 180, aboutYZ); 
+    } else {
+        rotateView(wgl, dXY * -5 * Math.PI / 180, aboutX);  
+    }
 
     // Zoom functions
     if (wgl.pxgamepad.buttons.leftTop || wgl.pxgamepad.buttons.rightTop) { // zoom in
@@ -747,6 +1014,41 @@ function handleControllerEvents(wgl) {
     if (wgl.pxgamepad.buttons.leftTrigger || wgl.pxgamepad.buttons.rightTrigger) { // zoom out
         zoomView(wgl, 0.01);
     } 
+    // Toggle 3d
+    if (wgl.pxgamepad.buttons.a) {
+        // Only register the first instance 
+        if (!aButtonIsDown) {
+            isRnB = !isRnB;
+            wgl.pxgamepad.on('a', function() {
+                aButtonIsDown = false;
+            });
+            aButtonIsDown = true;
+        }
+    }
+    // Switch shape
+    if (wgl.pxgamepad.buttons.x) { 
+        // Only register the first instance 
+        if (!xButtonIsDown) {
+            switchObj(1);
+            resetCamera(wgl);
+            wgl.pxgamepad.on('x', function() {
+                xButtonIsDown = false;
+            });
+            xButtonIsDown = true;
+        }
+    } 
+    if (wgl.pxgamepad.buttons.b) { 
+        // Only register the first instance 
+        if (!bButtonIsDown) {
+            switchObj(-1);
+            resetCamera(wgl);
+            wgl.pxgamepad.on('b', function() {
+                bButtonIsDown = false;
+            });
+            bButtonIsDown = true;
+        }
+    } 
+
     // Reset camera
     if (wgl.pxgamepad.buttons.y) { 
         resetCamera(wgl);
