@@ -11,7 +11,7 @@ const aboutXY = [1, 1, 0, 0];
 const aboutYZ = [0, 1, 1, 0];
 
 const isRnB   = true; // Whether to use 3d or not
-const is4d    = [ false, false, true ] // Square, Cube, Tesseract
+const is4d    = [ false, false, false, true ] // Square, Cube, Tesseract
 const selectedObj = 0;
 
 // -------------------------------------------------------------------------------------------------
@@ -242,6 +242,73 @@ function initShaders(gl, wgl) {
 // Initializes the models and buffers to be drawn in this scene.
 // -------------------------------------------------------------------------------------------------
 function initModels(gl, wgl) {
+    // ------------------------------------
+    // Line model
+    // ------------------------------------ 
+    lineModel = {};
+    // Set up buffers
+    lineModel.setupBuffers = function() {
+        // Setup object data
+        lineModel.vertexPositionBuffer           = gl.createBuffer();
+        lineModel.vertexPositionBufferItemSize   = 4;
+        lineModel.vertexPositionBufferNumItems   = 2;
+        lineModel.vertexIndexBuffer              = gl.createBuffer();
+        lineModel.vertexIndexBufferItemSize      = 1;
+        lineModel.vertexIndexBufferRoundNumItems = 2;
+
+        const lineVertexPositions = [
+             1.0,  0.0,  0.0, 1.0, // w is always 1 for non-4d
+            -1.0,  0.0,  0.0, 1.0,
+        ];
+        gl.bindBuffer(gl.ARRAY_BUFFER, lineModel.vertexPositionBuffer);
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(lineVertexPositions), gl.STATIC_DRAW);
+
+        const lineVertexIndices = [
+            0, 1,
+        ];
+        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, lineModel.vertexIndexBuffer);
+        gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(lineVertexIndices), gl.STATIC_DRAW);
+    }
+    lineModel.setupBuffers();
+
+    // Set up functions
+    lineModel.setupAttributes = function(colors) {
+        // Tell shader that it's NOT 4d
+        {
+            // False
+            gl.disableVertexAttribArray(wgl.attribLocations.is4d);
+            gl.vertexAttrib1f(wgl.attribLocations.is4d, -1.0);     
+        }
+        // Constant color for the line
+        {
+            var r, g, b, a;
+            if (colors == null) {
+                a = 1.0, r = g = b = 1.0; // white line
+            } else { 
+                r = colors[0]; g = colors[1]; b = colors[2]; a = colors[3];
+            }
+
+            gl.disableVertexAttribArray(wgl.attribLocations.vertexColor);
+            gl.vertexAttrib4fv(wgl.attribLocations.vertexColor, [ r, g, b, a ]);
+        }
+        // Vertex positions
+        {
+            const stride = 0; const offset = 0; const norm = false; const type = gl.FLOAT;
+
+            gl.enableVertexAttribArray(wgl.attribLocations.vertexPosition);
+            gl.bindBuffer(gl.ARRAY_BUFFER, lineModel.vertexPositionBuffer);
+            gl.vertexAttribPointer(wgl.attribLocations.vertexPosition,
+                                   lineModel.vertexPositionBufferItemSize,
+                                   type, norm, stride, offset);
+        }
+    }
+    lineModel.drawElements = function() {
+        const offset = 0;
+        // Element indices
+        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, lineModel.vertexIndexBuffer);
+        gl.drawElements(gl.LINE_LOOP, lineModel.vertexIndexBufferRoundNumItems,
+                        gl.UNSIGNED_SHORT, offset);
+    }
     // ------------------------------------
     // Square model
     // ------------------------------------ 
@@ -508,6 +575,7 @@ function initModels(gl, wgl) {
     // Put all models into wgl
     // ------------------------------------ 
     wgl.models = {
+        line: lineModel,
         square: squareModel,
         cube: cubeModel,
         tesseract: tesseractModel,
@@ -667,6 +735,21 @@ function initDrawables(gl, wgl) {
     // ------------------------------------
     // Instructions to draw objects
     // ------------------------------------ 
+    line = {
+        draw: function(deltaTime) {
+            if (!isRnB) { // Not 3d
+                wgl.models.line.setupAttributes([1.0, 1.0, 1.0, 1.0]);
+                wgl.pushMatrix();
+                    wgl.uploadMvMatrix();
+                    wgl.models.line.drawElements();
+                wgl.popMatrix();
+            } else { // 3d
+                wgl.pushMatrix();
+                    draw3dObject(wgl, wgl.models.line);
+                wgl.popMatrix();
+            }
+        }
+    };
     square = {
         draw: function(deltaTime) {
             if (!isRnB) { // Not 3d
@@ -716,8 +799,8 @@ function initDrawables(gl, wgl) {
     };
 
     // Put drawables into wgl
-    wgl.numberOfDrawables = 3;
-    wgl.listOfOpaqueDrawables = [ square, cube, tesseract ];
+    wgl.numberOfDrawables = 4;
+    wgl.listOfOpaqueDrawables = [ line, square, cube, tesseract ];
 }
 
 // -------------------------------------------------------------------------------------------------
