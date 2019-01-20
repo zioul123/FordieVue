@@ -100,8 +100,8 @@ function drawScene(gl, wgl, deltaTime) {
 // Function to draw the object in 3d.
 // -------------------------------------------------------------------------------------------------
 function draw3dObject(wgl, drawable) {
-    // Cyan object
-    drawable.setupAttributes([0.0, 1.0, 1.0, 1.0]);
+    // Red object viewed from left eye
+    drawable.setupAttributes([1.0, 0.0, 0.0, 1.0]);
     wgl.uploadMvMatrix();
     mat4.translate(wgl.projectionMatrix, wgl.projectionMatrix, 
                    [-0.01, 0, 0]);
@@ -116,8 +116,8 @@ function draw3dObject(wgl, drawable) {
     mat4.translate(wgl.projectionMatrix, wgl.projectionMatrix, 
                    [0.01, 0, 0]);
 
-    // Red cube
-    drawable.setupAttributes([1.0, 0.0, 0.0, 1.0]);
+    // Cyan cube from right eye
+    drawable.setupAttributes([0.0, 1.0, 1.0, 1.0]);
     wgl.uploadMvMatrix();
     wgl.uploadPMatrix();
     drawable.drawElements();
