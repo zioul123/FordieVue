@@ -598,53 +598,39 @@ function initDrawables(gl, wgl) {
     // ------------------------------------ 
     cube = {
         draw: function(deltaTime) {
-            wgl.models.cube.setupAttributes([1.0, 1.0, 1.0, 1.0]);
-            wgl.pushMatrix();
-                wgl.uploadMvMatrix();
-                wgl.models.cube.drawElements();
-            wgl.popMatrix();
+            if (!isRnB) { // Not 3d
+                wgl.models.cube.setupAttributes([1.0, 1.0, 1.0, 1.0]);
+                wgl.pushMatrix();
+                    wgl.uploadMvMatrix();
+                    wgl.models.cube.drawElements();
+                wgl.popMatrix();
+            } else { // 3d
+                wgl.pushMatrix();
+                    draw3dObject(wgl, wgl.models.cube);
+                wgl.popMatrix();
+            }
         }
     };
 
     tesseract = {
         draw: function(deltaTime) {
             if (!isRnB) { // Not 3d
-                wgl.models.tesseract.setupAttributes([1.0, 0.2, 0.2, 1.0]);
+                wgl.models.tesseract.setupAttributes([1.0, 1.0, 1.0, 1.0]);
                 wgl.pushMatrix();
                     wgl.uploadMvMatrix();
                     wgl.models.tesseract.drawElements();
                 wgl.popMatrix();
             } else { // 3d
                 wgl.pushMatrix();
-                    // Cyan cube
-                    wgl.models.tesseract.setupAttributes([0.0, 1.0, 1.0, 1.0]);
-                    wgl.uploadMvMatrix();
-                    mat4.translate(wgl.projectionMatrix, wgl.projectionMatrix, 
-                                   [-0.01, 0, 0]);
-                    // 0.01 rads is worked out as the lookat [0,0,0] angle correction
-                    mat4.rotate(wgl.projectionMatrix, wgl.projectionMatrix,
-                                0.08, [0, -1, 0]);
-                    wgl.uploadPMatrix();
-                    wgl.models.tesseract.drawElements();
-                    // Reverse the rotation and translation to render blue in-place
-                    mat4.rotate(wgl.projectionMatrix, wgl.projectionMatrix,
-                                0.08, [0, 1, 0]);
-                    mat4.translate(wgl.projectionMatrix, wgl.projectionMatrix, 
-                                   [0.01, 0, 0]);
-
-                    // Red cube
-                    wgl.models.tesseract.setupAttributes([1.0, 0.0, 0.0, 1.0]);
-                    wgl.uploadMvMatrix();
-                    wgl.uploadPMatrix();
-                    wgl.models.tesseract.drawElements();
+                    draw3dObject(wgl, wgl.models.tesseract);
                 wgl.popMatrix();
             }
         }
     };
 
     // Put drawables into wgl
-    wgl.numberOfDrawables = 1;
-    wgl.listOfOpaqueDrawables = [ tesseract ];
+    wgl.numberOfDrawables = 2;
+    wgl.listOfOpaqueDrawables = [ cube, tesseract ];
 }
 
 // -------------------------------------------------------------------------------------------------
