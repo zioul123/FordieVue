@@ -16,7 +16,11 @@ let selectedObj = 3;
 
 // a button pressed
 let aButtonIsDown = false;  // if it was not down, trigger the onPress event, otherwise ignore
+let xButtonIsDown = false;  // if it was not down, trigger the onPress event, otherwise ignore
+let bButtonIsDown = false;  // if it was not down, trigger the onPress event, otherwise ignore
 let spacebarIsDown = false; // if it was not down, trigger the onPress event, otherwise ignore
+let shiftIsDown = false;    // if it was not down, trigger the onPress event, otherwise ignore
+let ctrlIsDown = false;     // if it was not down, trigger the onPress event, otherwise ignore
 
 // -------------------------------------------------------------------------------------------------
 // ----------------------------------- Main/Render functions ---------------------------------------
@@ -693,8 +697,14 @@ function initListeners(gl, wgl, canvas, render) {
     function handleKeyUp(event) {
         wgl.listOfPressedKeys[event.keyCode] = false;
         // Reset the repeated-press prone buttons
-        if (event.keyCode == 32) {
+        if (event.keyCode == 32) { // Space
             spacebarIsDown = false;
+        }
+        if (event.keyCode == 16) { // Shift
+            shiftIsDown = false;
+        }
+        if (event.keyCode == 17) { // Ctrl
+            ctrlIsDown = false;
         }
         // console.log("keyup - keyCode=%d, charCode=%d", event.keyCode, event.charCode);
     }
@@ -866,6 +876,18 @@ function resetCamera(wgl) {
 }
 
 // -------------------------------------------------------------------------------------------------
+// Switch the current object
+// -------------------------------------------------------------------------------------------------
+function switchObj(incr) {
+    selectedObj += incr;
+    if (selectedObj == -1) {
+        selectedObj = is4d.length - 1;
+    } else if (selectedObj >= is4d.length) {
+        selectedObj = 0;
+    }
+}
+
+// -------------------------------------------------------------------------------------------------
 // Handle key presses.
 // -------------------------------------------------------------------------------------------------
 function handlePressedDownKeys(wgl) {  
@@ -883,6 +905,22 @@ function handlePressedDownKeys(wgl) {
         if (!spacebarIsDown) {
             isRnB = !isRnB;
             spacebarIsDown = true;
+        }
+    } 
+
+    // Toggle shape
+    if (wgl.listOfPressedKeys[16]) { // shift
+        // Only register the first instance 
+        if (!shiftIsDown) {
+            switchObj(1);
+            shiftIsDown = true;
+        }
+    } 
+    if (wgl.listOfPressedKeys[17]) { // ctrl
+        // Only register the first instance 
+        if (!ctrlIsDown) {
+            switchObj(-1);
+            ctrlIsDown = true;
         }
     } 
 
@@ -984,6 +1022,28 @@ function handleControllerEvents(wgl) {
             aButtonIsDown = true;
         }
     }
+    // Switch shape
+    if (wgl.pxgamepad.buttons.x) { 
+        // Only register the first instance 
+        if (!xButtonIsDown) {
+            switchObj(1);
+            wgl.pxgamepad.on('x', function() {
+                xButtonIsDown = false;
+            });
+            xButtonIsDown = true;
+        }
+    } 
+    if (wgl.pxgamepad.buttons.b) { 
+        // Only register the first instance 
+        if (!bButtonIsDown) {
+            switchObj(-1);
+            wgl.pxgamepad.on('b', function() {
+                bButtonIsDown = false;
+            });
+            bButtonIsDown = true;
+        }
+    } 
+
     // Reset camera
     if (wgl.pxgamepad.buttons.y) { 
         resetCamera(wgl);
