@@ -381,6 +381,10 @@ function initModels(gl, wgl) {
         gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, squareModel.vertexIndexBuffer);
         gl.drawElements(gl.LINE_LOOP, squareModel.vertexIndexBufferRoundNumItems,
                         gl.UNSIGNED_SHORT, offset);
+        // Points
+        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, squareModel.vertexIndexBuffer);
+        gl.drawElements(gl.POINTS, squareModel.vertexIndexBufferRoundNumItems,
+                        gl.UNSIGNED_SHORT, offset);
     }
 
     // ------------------------------------
