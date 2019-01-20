@@ -12,7 +12,7 @@ const aboutYZ = [0, 1, 1, 0];
 
 const isRnB   = true; // Whether to use 3d or not
 const is4d    = [ false, false, false, true ] // Square, Cube, Tesseract
-const selectedObj = 2;
+const selectedObj = 0;
 
 // -------------------------------------------------------------------------------------------------
 // ----------------------------------- Main/Render functions ---------------------------------------
@@ -307,6 +307,10 @@ function initModels(gl, wgl) {
         // Element indices
         gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, lineModel.vertexIndexBuffer);
         gl.drawElements(gl.LINE_LOOP, lineModel.vertexIndexBufferRoundNumItems,
+                        gl.UNSIGNED_SHORT, offset);
+        // Points
+        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, lineModel.vertexIndexBuffer);
+        gl.drawElements(gl.POINTS, lineModel.vertexIndexBufferRoundNumItems,
                         gl.UNSIGNED_SHORT, offset);
     }
     // ------------------------------------
