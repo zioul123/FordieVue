@@ -1007,7 +1007,7 @@ function handleControllerEvents(wgl) {
     // Rotate about W IF selected object is 4d compatible
     if (is4d[selectedObj]) {
         rotateView(wgl, dXZ * 2 * Math.PI / 180, aboutXZ); 
-        rotateView(wgl, dXY * 5 * Math.PI / 180, aboutXY); 
+        rotateView(wgl, dXY * 2 * Math.PI / 180, aboutXY); 
         rotateView(wgl, dYZ * 2 * Math.PI / 180, aboutYZ); 
     } else {
         rotateView(wgl, dXY * -5 * Math.PI / 180, aboutX);  

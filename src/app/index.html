@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="en">
     <head>
-        <title>Fordy View</title>
+        <title>FordieVue - 3D View of a 4D Hypercube</title>
         <meta charset="utf-8">
         <script src="../libs/jquery-1.11.2.min.js"></script>
         <script src="../libs/gl-matrix.js"></script>
@@ -12,19 +12,118 @@
         <script src="vs.vert"></script>
         <script src="fs.frag"></script>
         <script src="main.js"></script>
+        <style>
+            * {
+              box-sizing: border-box;
+              text-align: center;
+            }
+
+            /* Create three equal columns that floats next to each other */
+            .column {
+              float: left;
+              width: 33.33%;
+              padding: 10px;
+            }
+
+            /* Clear floats after the columns */
+            .row:after {
+              content: "";
+              display: table;
+              clear: both;
+            }
+
+            .container img {
+              width: 100%;
+            }
+
+            .container {
+              width: 100%;
+              margin: 0 auto;
+            }
+
+            body {
+                color: white;
+                font-weight: lighter;
+                font-family: "Lucida Sans Unicode", "Lucida Grande", sans-serif
+            }
+        </style>
     </head> 
-    <body onload = "main();">
+    <body onload = "main();" style="background-color:black;">
         <style>
             div.centered {
                 text-align: center;
             }
         </style>
         <div class="centered">
-            <h1>Fordy View</h1>
-            <canvas id="glcanvas" width="480" height="480"></canvas>
-            <p>FPS: <span id="fps">--</span></p>
-            <p>Controls: </p>
-            <p>To be written</p>
+            <h1>FordieVue - 3D View of a 4D Hypercube</h1>
+            <p>You are currently looking at a:</p>
+            <span id="viewingItem">--</span>
+            <p></p>
         </div>
+
+        <div class="row">
+            <div class="column">
+                <div class="container">
+                    <img src="../../docs/controller_white.png" alt="Controller controls">
+                </div>
+            </div>
+            <div class="column">
+                <canvas id="glcanvas" width="480" height="480"></canvas>
+                <div class="centered">FPS: <span id="fps">--</span></div>
+            </div>
+            <div class="column">
+                <div class="container">
+                <h2>Controls for keyboard:</h2>
+                <table style="width:100%">
+                    <tr>
+                        <th>Function</th>
+                        <th>Keys</th> 
+                    </tr>
+                    <tr>
+                        <td>Toggle 3d Anaglyph</td>
+                        <td>Spacebar</td> 
+                    </tr>
+                    <tr>
+                        <td>View Other Shapes</td>
+                        <td>Shift/Ctrl</td> 
+                    </tr>
+                    <tr>
+                        <td>Zoom In/Out</td>
+                        <td>x/z</td> 
+                    </tr>
+                    <tr>
+                        <td>Reset Cube</td>
+                        <td>r</td> 
+                    </tr>
+                    <tr>
+                        <td>Rotate About X-Axis</td>
+                        <td>Up/Down Arrow Keys</td> 
+                    </tr>
+                    <tr>
+                        <td>Rotate About Y-Axis</td>
+                        <td>Left/Right Arrow Keys</td> 
+                    </tr>
+                    <tr>
+                        <td>Rotate about Z-Axis</td>
+                        <td>a/d</td> 
+                    </tr>
+                    <tr>
+                        <td>Rotate About XY-Plane</td>
+                        <td>w/s</td> 
+                    </tr>
+                    <tr>
+                        <td>Rotate About XZ-Plane</td>
+                        <td>i/j</td> 
+                    </tr>
+                    <tr>
+                        <td>Rotate About YZ-Plane</td>
+                        <td>j/k</td> 
+                    </tr>
+                </table>
+                </div>
+            </div>
+        </div>
+        
+    
     </body>
 </html>
