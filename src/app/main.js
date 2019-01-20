@@ -873,6 +873,7 @@ function zoomView(wgl, amt) {
 function resetCamera(wgl) {
     mat5.identity(wgl.viewMatrix);
     wgl.zoomScale = defaultZoom;    
+    wgl.fovy = defaultFovy;
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -913,6 +914,7 @@ function handlePressedDownKeys(wgl) {
         // Only register the first instance 
         if (!shiftIsDown) {
             switchObj(1);
+            resetCamera(wgl);
             shiftIsDown = true;
         }
     } 
@@ -920,6 +922,7 @@ function handlePressedDownKeys(wgl) {
         // Only register the first instance 
         if (!ctrlIsDown) {
             switchObj(-1);
+            resetCamera(wgl);
             ctrlIsDown = true;
         }
     } 
@@ -1027,6 +1030,7 @@ function handleControllerEvents(wgl) {
         // Only register the first instance 
         if (!xButtonIsDown) {
             switchObj(1);
+            resetCamera(wgl);
             wgl.pxgamepad.on('x', function() {
                 xButtonIsDown = false;
             });
@@ -1037,6 +1041,7 @@ function handleControllerEvents(wgl) {
         // Only register the first instance 
         if (!bButtonIsDown) {
             switchObj(-1);
+            resetCamera(wgl);
             wgl.pxgamepad.on('b', function() {
                 bButtonIsDown = false;
             });
