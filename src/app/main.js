@@ -11,7 +11,7 @@ const aboutXY = [1, 1, 0, 0];
 const aboutYZ = [0, 1, 1, 0];
 
 const isRnB   = true; // Whether to use 3d or not
-const is4d    = [ false, true ] // Cube, tesseract
+const is4d    = [ false, false, true ] // Square, Cube, Tesseract
 const selectedObj = 0;
 
 // -------------------------------------------------------------------------------------------------
@@ -243,6 +243,76 @@ function initShaders(gl, wgl) {
 // -------------------------------------------------------------------------------------------------
 function initModels(gl, wgl) {
     // ------------------------------------
+    // Square model
+    // ------------------------------------ 
+    squareModel = {};
+    // Set up buffers
+    squareModel.setupBuffers = function() {
+        // Setup object data
+        squareModel.vertexPositionBuffer           = gl.createBuffer();
+        squareModel.vertexPositionBufferItemSize   = 4;
+        squareModel.vertexPositionBufferNumItems   = 4;
+        squareModel.vertexIndexBuffer              = gl.createBuffer();
+        squareModel.vertexIndexBufferItemSize      = 1;
+        squareModel.vertexIndexBufferRoundNumItems = 4;
+
+        const squareVertexPositions = [
+             1.0,  1.0,  0.0, 1.0, // w is always 1 for non-4d
+             1.0, -1.0,  0.0, 1.0,
+            -1.0, -1.0,  0.0, 1.0, 
+            -1.0,  1.0,  0.0, 1.0,
+        ];
+        gl.bindBuffer(gl.ARRAY_BUFFER, squareModel.vertexPositionBuffer);
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(squareVertexPositions), gl.STATIC_DRAW);
+
+        const squareVertexIndices = [
+            0, 1, 2, 3,
+        ];
+        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, squareModel.vertexIndexBuffer);
+        gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(squareVertexIndices), gl.STATIC_DRAW);
+    }
+    squareModel.setupBuffers();
+
+    // Set up functions
+    squareModel.setupAttributes = function(colors) {
+        // Tell shader that it's NOT 4d
+        {
+            // False
+            gl.disableVertexAttribArray(wgl.attribLocations.is4d);
+            gl.vertexAttrib1f(wgl.attribLocations.is4d, -1.0);     
+        }
+        // Constant color for the square
+        {
+            var r, g, b, a;
+            if (colors == null) {
+                a = 1.0, r = g = b = 1.0; // white square
+            } else { 
+                r = colors[0]; g = colors[1]; b = colors[2]; a = colors[3];
+            }
+
+            gl.disableVertexAttribArray(wgl.attribLocations.vertexColor);
+            gl.vertexAttrib4fv(wgl.attribLocations.vertexColor, [ r, g, b, a ]);
+        }
+        // Vertex positions
+        {
+            const stride = 0; const offset = 0; const norm = false; const type = gl.FLOAT;
+
+            gl.enableVertexAttribArray(wgl.attribLocations.vertexPosition);
+            gl.bindBuffer(gl.ARRAY_BUFFER, squareModel.vertexPositionBuffer);
+            gl.vertexAttribPointer(wgl.attribLocations.vertexPosition,
+                                   squareModel.vertexPositionBufferItemSize,
+                                   type, norm, stride, offset);
+        }
+    }
+    squareModel.drawElements = function() {
+        const offset = 0;
+        // Element indices
+        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, squareModel.vertexIndexBuffer);
+        gl.drawElements(gl.LINE_LOOP, squareModel.vertexIndexBufferRoundNumItems,
+                        gl.UNSIGNED_SHORT, offset);
+    }
+
+    // ------------------------------------
     // Cube model
     // ------------------------------------ 
     cubeModel = {};
@@ -438,6 +508,7 @@ function initModels(gl, wgl) {
     // Put all models into wgl
     // ------------------------------------ 
     wgl.models = {
+        square: squareModel,
         cube: cubeModel,
         tesseract: tesseractModel,
     }
@@ -594,8 +665,24 @@ function initMatrixStack(gl, wgl) {
 // -------------------------------------------------------------------------------------------------
 function initDrawables(gl, wgl) {
     // ------------------------------------
-    // Instructions to draw cube
+    // Instructions to draw objects
     // ------------------------------------ 
+    square = {
+        draw: function(deltaTime) {
+            if (!isRnB) { // Not 3d
+                wgl.models.square.setupAttributes([1.0, 1.0, 1.0, 1.0]);
+                wgl.pushMatrix();
+                    wgl.uploadMvMatrix();
+                    wgl.models.square.drawElements();
+                wgl.popMatrix();
+            } else { // 3d
+                wgl.pushMatrix();
+                    draw3dObject(wgl, wgl.models.square);
+                wgl.popMatrix();
+            }
+        }
+    };
+
     cube = {
         draw: function(deltaTime) {
             if (!isRnB) { // Not 3d
@@ -629,8 +716,8 @@ function initDrawables(gl, wgl) {
     };
 
     // Put drawables into wgl
-    wgl.numberOfDrawables = 2;
-    wgl.listOfOpaqueDrawables = [ cube, tesseract ];
+    wgl.numberOfDrawables = 3;
+    wgl.listOfOpaqueDrawables = [ square, cube, tesseract ];
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -746,14 +833,16 @@ function handleControllerEvents(wgl) {
     var dYZ = wgl.pxgamepad.dpad.x;
 
     // Rotate accordingly
-    rotateView(wgl, dX * 5 * Math.PI / 180, aboutY);
-    rotateView(wgl, dY * 5 * Math.PI / 180, aboutX);  
+    rotateView(wgl, dX * -5 * Math.PI / 180, aboutY);
+    rotateView(wgl, dY * -5 * Math.PI / 180, aboutX);  
     rotateView(wgl, dZ * 5 * Math.PI / 180, aboutZ);  
     // Rotate about W IF selected object is 4d compatible
     if (is4d[selectedObj]) {
         rotateView(wgl, dXZ * 2 * Math.PI / 180, aboutXZ); 
         rotateView(wgl, dXY * 5 * Math.PI / 180, aboutXY); 
         rotateView(wgl, dYZ * 2 * Math.PI / 180, aboutYZ); 
+    } else {
+        rotateView(wgl, dXY * -5 * Math.PI / 180, aboutX);  
     }
 
     // Zoom functions
