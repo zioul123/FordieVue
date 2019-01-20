@@ -11,6 +11,8 @@ const aboutXY = [1, 1, 0, 0];
 const aboutYZ = [0, 1, 1, 0];
 
 const isRnB   = true; // Whether to use 3d or not
+const is4d    = [ false, true ] // Cube, tesseract
+const selectedObj = 0;
 
 // -------------------------------------------------------------------------------------------------
 // ----------------------------------- Main/Render functions ---------------------------------------
@@ -78,9 +80,34 @@ function drawScene(gl, wgl, deltaTime) {
     gl.disable(gl.DEPTH_TEST);
     gl.depthMask(false);
     gl.enable(gl.BLEND);
-    for (let i = 0; i < wgl.numberOfDrawables; i++) {
-        wgl.listOfOpaqueDrawables[i].draw(deltaTime);
-    }
+    wgl.listOfOpaqueDrawables[selectedObj].draw(deltaTime);
+}
+
+// -------------------------------------------------------------------------------------------------
+// Function to draw the object in 3d.
+// -------------------------------------------------------------------------------------------------
+function draw3dObject(wgl, drawable) {
+    // Cyan object
+    drawable.setupAttributes([0.0, 1.0, 1.0, 1.0]);
+    wgl.uploadMvMatrix();
+    mat4.translate(wgl.projectionMatrix, wgl.projectionMatrix, 
+                   [-0.01, 0, 0]);
+    // 0.08 rads is worked out as the angle correction (trial and error)
+    mat4.rotate(wgl.projectionMatrix, wgl.projectionMatrix,
+                0.08, [0, -1, 0]);
+    wgl.uploadPMatrix();
+    drawable.drawElements();
+    // Reverse the rotation and translation to render blue in-place
+    mat4.rotate(wgl.projectionMatrix, wgl.projectionMatrix,
+                0.08, [0, 1, 0]);
+    mat4.translate(wgl.projectionMatrix, wgl.projectionMatrix, 
+                   [0.01, 0, 0]);
+
+    // Red cube
+    drawable.setupAttributes([1.0, 0.0, 0.0, 1.0]);
+    wgl.uploadMvMatrix();
+    wgl.uploadPMatrix();
+    drawable.drawElements();
 }
 
 // -------------------------------------------------------------------------------------------------
