@@ -10,9 +10,13 @@ const aboutXZ = [1, 0, 1, 0];
 const aboutXY = [1, 1, 0, 0];
 const aboutYZ = [0, 1, 1, 0];
 
-const isRnB   = true; // Whether to use 3d or not
+let isRnB   = true; // Whether to use 3d or not
 const is4d    = [ false, false, false, true ] // Square, Cube, Tesseract
-const selectedObj = 0;
+let selectedObj = 3;
+
+// a button pressed
+let aButtonIsDown = false;  // if it was not down, trigger the onPress event, otherwise ignore
+let spacebarIsDown = false; // if it was not down, trigger the onPress event, otherwise ignore
 
 // -------------------------------------------------------------------------------------------------
 // ----------------------------------- Main/Render functions ---------------------------------------
@@ -688,6 +692,10 @@ function initListeners(gl, wgl, canvas, render) {
     }
     function handleKeyUp(event) {
         wgl.listOfPressedKeys[event.keyCode] = false;
+        // Reset the repeated-press prone buttons
+        if (event.keyCode == 32) {
+            spacebarIsDown = false;
+        }
         // console.log("keyup - keyCode=%d, charCode=%d", event.keyCode, event.charCode);
     }
     function handleKeyPress(event) {} // Doesn't do anything
@@ -869,6 +877,15 @@ function handlePressedDownKeys(wgl) {
         zoomView(wgl, 0.01);
     } 
 
+    // Toggle 3d
+    if (wgl.listOfPressedKeys[32]) { // space
+        // Only register the first instance 
+        if (!spacebarIsDown) {
+            isRnB = !isRnB;
+            spacebarIsDown = true;
+        }
+    } 
+
     // Camera movement functions
     if (wgl.listOfPressedKeys[37]) { // left
         rotateView(wgl, 5 * Math.PI / 180, aboutY);
@@ -956,6 +973,17 @@ function handleControllerEvents(wgl) {
     if (wgl.pxgamepad.buttons.leftTrigger || wgl.pxgamepad.buttons.rightTrigger) { // zoom out
         zoomView(wgl, 0.01);
     } 
+    // Toggle 3d
+    if (wgl.pxgamepad.buttons.a) {
+        // Only register the first instance 
+        if (!aButtonIsDown) {
+            isRnB = !isRnB;
+            wgl.pxgamepad.on('a', function() {
+                aButtonIsDown = false;
+            });
+            aButtonIsDown = true;
+        }
+    }
     // Reset camera
     if (wgl.pxgamepad.buttons.y) { 
         resetCamera(wgl);
