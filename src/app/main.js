@@ -75,9 +75,9 @@ function drawScene(gl, wgl, deltaTime) {
     // ------------------------------------
     // Draw all objects
     // ------------------------------------    
-    gl.enable(gl.DEPTH_TEST);
-    gl.depthMask(true);
-    gl.disable(gl.BLEND);
+    gl.disable(gl.DEPTH_TEST);
+    gl.depthMask(false);
+    gl.enable(gl.BLEND);
     for (let i = 0; i < wgl.numberOfDrawables; i++) {
         wgl.listOfOpaqueDrawables[i].draw(deltaTime);
     }
@@ -422,6 +422,7 @@ function initModels(gl, wgl) {
 function initGl(gl, wgl) {
     gl.clearColor(0.0, 0.0, 0.0, 1.0);
     gl.clearDepth(1.0);
+    gl.blendFunc(gl.ONE, gl.ONE);
     // gl.depthFunc(gl.LEQUAL); // Near things obscure far things
 
     // For perspective matrix setup
