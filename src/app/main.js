@@ -134,8 +134,23 @@ function createGLContext(canvas) {
         alert("Unable to initialize WebGL.");
         return;
     }
+
     context.viewportWidth  = canvas.width;
     context.viewportHeight = canvas.height;
+
+    // Resize the canvas properly
+    function resizeCanvas() {
+        // Resize the canvas
+        var glcanvas = document.getElementById("glcanvas");
+        var canvasContainer = document.getElementById("canvasContainer");
+        glcanvas.width = canvasContainer.clientWidth;
+        glcanvas.height = glcanvas.width; // 1:1 aspect ratio
+        // Resize the viewport
+        context.viewportWidth  = glcanvas.width;
+        context.viewportHeight = glcanvas.height;
+    }
+    window.addEventListener('resize', resizeCanvas, false);
+
     return context;
 }
 
