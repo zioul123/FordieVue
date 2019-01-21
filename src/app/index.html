@@ -13,9 +13,15 @@
         <script src="fs.frag"></script>
         <script src="main.js"></script>
         <style>
+            /*
+             * PAGE LAYOUT/THEME
+             */
             * {
-              box-sizing: border-box;
-              text-align: center;
+                box-sizing: border-box;
+                text-align: center;
+                color: white;
+                font-weight: lighter;
+                font-family: "Lucida Sans Unicode", "Lucida Grande", sans-serif
             }
 
             /* Create three equal columns that floats next to each other */
@@ -41,12 +47,69 @@
               margin: 0 auto;
             }
 
-            body {
+            /* 
+             * TABS
+             */
+            /* Style the tab */
+            .tab {
+                overflow: hidden;
+                
+                background-color: #000000;
+            }
+
+            /* Style the buttons that are used to open the tab content */
+            .tab button {
+                background-color: inherit;
+                float: center;
                 color: white;
-                font-weight: lighter;
-                font-family: "Lucida Sans Unicode", "Lucida Grande", sans-serif
+                border: none;
+                font-size: 16px;
+                outline: none;
+                cursor: pointer;
+                padding: 14px 16px;
+                transition: 0.3s;
+            }
+
+            /* Change background color of buttons on hover */
+            .tab button:hover {
+                background-color: #555;
+            }
+
+            /* Create an active/current tablink class */
+            .tab button.active {
+                background-color: #333333;
+            }
+
+            /* Style the tab content */
+            .tabcontent {
+                display: none;
+                padding: 6px 12px;
+                border-top: none;
             }
         </style>
+        <script>
+            // View the controls tab that is selected
+            function viewControls(evt, buttonName) {
+                // Declare all variables
+                var i, tabcontent, tablinks;
+
+                // Get all elements with class="tabcontent" and hide them
+                tabcontent = document.getElementsByClassName("tabcontent");
+                for (i = 0; i < tabcontent.length; i++) {
+                    tabcontent[i].style.display = "none";
+                }
+
+                // Get all elements with class="tablinks" and remove the class "active"
+                tablinks = document.getElementsByClassName("tablinks");
+                for (i = 0; i < tablinks.length; i++) {
+                    tablinks[i].className = tablinks[i].className.replace(" active", "");
+                }
+
+                // Show the current tab, and add an "active" class to the button that opened the tab
+                document.getElementById(buttonName).style.display = "block";
+                evt.currentTarget.className += " active";
+            }
+        </script>
     </head> 
     <body onload = "main();" style="background-color:black;">
         <style>
@@ -56,75 +119,91 @@
         </style>
         <div class="centered">
             <h1>FordieVue - 3D View of a 4D Hypercube</h1>
-            <p>You are currently looking at a:</p>
-            <h2 id="viewingItem">--</h2>
         </div>
 
         <div class="row">
             <div class="column">
                 <div class="container">
-                    <p></p>
-                    <p></p>
+                    <h2>Controls for Controller:</h2>
                     <img src="../../docs/controller_white.png" alt="Controller controls">
                 </div>
             </div>
-            <div class="column">
-                <canvas id="glcanvas" width="480" height="480"></canvas>
+            <div class="column" id="canvasContainer">
+                <p>You are currently looking at a:</p>
+                <h2 id="viewingItem">--</h2>
+                <canvas id="glcanvas" width="640" height="640" style="width:100%; height:auto;"></canvas>
                 <div class="centered">FPS: <span id="fps">--</span></div>
                 <p></p>
                 <a href="https://github.com/zioul123/FordieVue">[Source Code]</a>
             </div>
             <div class="column">
-                <div class="container">
-                <h2>Controls for keyboard:</h2>
-                <table style="width:100%">
-                    <tr>
-                        <th>Function</th>
-                        <th>Keys</th> 
-                    </tr>
-                    <tr>
-                        <td>Toggle 3d Anaglyph</td>
-                        <td>Spacebar</td> 
-                    </tr>
-                    <tr>
-                        <td>View Other Shapes</td>
-                        <td>Shift/Ctrl</td> 
-                    </tr>
-                    <tr>
-                        <td>Zoom In/Out</td>
-                        <td>x/z</td> 
-                    </tr>
-                    <tr>
-                        <td>Reset Cube</td>
-                        <td>r</td> 
-                    </tr>
-                    <tr>
-                        <td>Rotate About X-Axis</td>
-                        <td>Up/Down Arrow Keys</td> 
-                    </tr>
-                    <tr>
-                        <td>Rotate About Y-Axis</td>
-                        <td>Left/Right Arrow Keys</td> 
-                    </tr>
-                    <tr>
-                        <td>Rotate about Z-Axis</td>
-                        <td>a/d</td> 
-                    </tr>
-                    <tr>
-                        <td>Rotate About XY-Plane</td>
-                        <td>w/s</td> 
-                    </tr>
-                    <tr>
-                        <td>Rotate About XZ-Plane</td>
-                        <td>i/j</td> 
-                    </tr>
-                    <tr>
-                        <td>Rotate About YZ-Plane</td>
-                        <td>j/k</td> 
-                    </tr>
-                </table>
+                <br><br>
+                <h2 id="ControlsText">Controls</h2>
+                <!-- Controls tabs -->
+                <div class="tab">
+                    <button class="tablinks" onclick="viewControls(event, 'Keyboard')" id="defaultOpen">Keyboard</button> 
+                    <button class="tablinks" onclick="viewControls(event, 'Controller')">Controller</button>
+                </div>
+                <!-- Controls tab content -->
+                <div id="Keyboard" class="tabcontent" style="display: block;">
+
+                    <div class="container">
+                        <br>
+                    <table style="width:100%">
+                        <tr>
+                            <th><i>Function</i></th>
+                            <th><i>Keys</i></th> 
+                        </tr>
+                        <tr>
+                            <td>Toggle 3d Anaglyph</td>
+                            <td>Spacebar</td> 
+                        </tr>
+                        <tr>
+                            <td>View Other Shapes</td>
+                            <td>Shift/Ctrl</td> 
+                        </tr>
+                        <tr>
+                            <td>Zoom In/Out</td>
+                            <td>x/z</td> 
+                        </tr>
+                        <tr>
+                            <td>Reset Cube</td>
+                            <td>r</td> 
+                        </tr>
+                        <tr>
+                            <td>Rotate About X-Axis</td>
+                            <td>Up/Down Arrow Keys</td> 
+                        </tr>
+                        <tr>
+                            <td>Rotate About Y-Axis</td>
+                            <td>Left/Right Arrow Keys</td> 
+                        </tr>
+                        <tr>
+                            <td>Rotate about Z-Axis</td>
+                            <td>a/d</td> 
+                        </tr>
+                        <tr>
+                            <td>Rotate About XY-Plane</td>
+                            <td>w/s</td> 
+                        </tr>
+                        <tr>
+                            <td>Rotate About XZ-Plane</td>
+                            <td>i/j</td> 
+                        </tr>
+                        <tr>
+                            <td>Rotate About YZ-Plane</td>
+                            <td>j/k</td> 
+                        </tr>
+                    </table>
+                    </div>
+                </div>
+                <div id="Controller" class="tabcontent"> 
+                    <div class="container">
+                        <img src="../../docs/controller_white.png" alt="Controller controls">
+                    </div>  
                 </div>
             </div>
         </div>
+        <script type="text/javascript">document.getElementById("defaultOpen").click();</script>
     </body>
 </html>
