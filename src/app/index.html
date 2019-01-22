@@ -28,7 +28,7 @@
             .column {
               float: left;
               width: 33.33%;
-              padding: 10px;
+              padding: 0px 10px 10px 10px;
             }
 
             /* Clear floats after the columns */
@@ -53,7 +53,6 @@
             /* Style the tab */
             .tab {
                 overflow: hidden;
-                
                 background-color: #000000;
             }
 
@@ -88,23 +87,22 @@
             }
         </style>
         <script>
-            // View the controls tab that is selected
-            function viewControls(evt, buttonName) {
+            // View the tab that is selected. Only filter based on the contentString and linkString,
+            // so to filter controls tabs, "controltabcontent" and "controltablinks" are used,
+            // and for explanation tabs, "explanationtabcontent" and "explanationtablinks" are used.
+            function viewControls(evt, buttonName, contentString, linkString) {
                 // Declare all variables
                 var i, tabcontent, tablinks;
-
                 // Get all elements with class="tabcontent" and hide them
-                tabcontent = document.getElementsByClassName("tabcontent");
+                tabcontent = document.getElementsByClassName(contentString);
                 for (i = 0; i < tabcontent.length; i++) {
                     tabcontent[i].style.display = "none";
                 }
-
                 // Get all elements with class="tablinks" and remove the class "active"
-                tablinks = document.getElementsByClassName("tablinks");
+                tablinks = document.getElementsByClassName(linkString);
                 for (i = 0; i < tablinks.length; i++) {
                     tablinks[i].className = tablinks[i].className.replace(" active", "");
                 }
-
                 // Show the current tab, and add an "active" class to the button that opened the tab
                 document.getElementById(buttonName).style.display = "block";
                 evt.currentTarget.className += " active";
@@ -119,34 +117,46 @@
         </style>
         <div class="centered">
             <h1>FordieVue - 3D View of a 4D Hypercube</h1>
+            <p style="margin-bottom: 0px;">You are currently looking at a:</p>
         </div>
-
         <div class="row">
-            <div class="column">
-                <div class="container">
-                    <h2>Controls for Controller:</h2>
-                    <img src="../../docs/controller_white.png" alt="Controller controls">
+            <!-- LEFT COLUMN: WRITEUP -->
+            <div class="column" style="padding: 70px 0">
+                <h2 id="ControlsText">Understanding the Fourth Dimension</h2>
+                <div class="tab">
+                    <button class="explanationtablinks" onclick="viewControls(event, 'Hypercube', 'explanationtabcont', 'explanationtablinks')" id="defaultOpenExplanation">Hypercube</button> 
+                    <button class="explanationtablinks" onclick="viewControls(event, 'Projection', 'explanationtabcont', 'explanationtablinks')">Projection</button>
+                </div>
+                <!-- Controls tab content -->
+                <div id="Hypercube" class="explanationtabcont" style="display: block;">
+                    <div class="container">
+                        <p>This is a hypercube!</p>
+                    </div>
+                </div>
+                <div id="Projection" class="explanationtabcont"> 
+                    <div class="container">
+                        <p>Projection in 3d works like this: </p>
+                    </div>  
                 </div>
             </div>
+            <!-- MIDDLE COLUMN: CUBE -->
             <div class="column" id="canvasContainer">
-                <p>You are currently looking at a:</p>
                 <h2 id="viewingItem">--</h2>
-                <canvas id="glcanvas" width="640" height="640" style="width:100%; height:auto;"></canvas>
-                <div class="centered">FPS: <span id="fps">--</span></div>
+                <canvas id="glcanvas" width="640" height="640" style="width:100%; height:auto; outline: white 3px solid;"></canvas>
+                <div class="centered" style = "margin: .67em 0 ">FPS: <span id="fps">--</span></div>
                 <p></p>
                 <a href="https://github.com/zioul123/FordieVue">[Source Code]</a>
             </div>
-            <div class="column">
-                <br><br>
+            <!-- RIGHT COLUMN: CONTROLS -->
+            <div class="column" style="padding: 70px 0">
                 <h2 id="ControlsText">Controls</h2>
                 <!-- Controls tabs -->
                 <div class="tab">
-                    <button class="tablinks" onclick="viewControls(event, 'Keyboard')" id="defaultOpen">Keyboard</button> 
-                    <button class="tablinks" onclick="viewControls(event, 'Controller')">Controller</button>
+                    <button class="controltablinks" onclick="viewControls(event, 'Keyboard', 'controltabcont', 'controltablinks')" id="defaultOpenControls">Keyboard</button> 
+                    <button class="controltablinks" onclick="viewControls(event, 'Controller', 'controltabcont', 'controltablinks')">Controller</button>
                 </div>
                 <!-- Controls tab content -->
-                <div id="Keyboard" class="tabcontent" style="display: block;">
-
+                <div id="Keyboard" class="controltabcont" style="display: block;">
                     <div class="container">
                         <br>
                     <table style="width:100%">
@@ -197,13 +207,16 @@
                     </table>
                     </div>
                 </div>
-                <div id="Controller" class="tabcontent"> 
+                <div id="Controller" class="controltabcont" style="display: none;"> 
                     <div class="container">
                         <img src="../../docs/controller_white.png" alt="Controller controls">
                     </div>  
                 </div>
             </div>
         </div>
-        <script type="text/javascript">document.getElementById("defaultOpen").click();</script>
+        <script type="text/javascript">
+            document.getElementById("defaultOpenExplanation").click();
+            document.getElementById("defaultOpenControls").click();
+        </script>
     </body>
 </html>
