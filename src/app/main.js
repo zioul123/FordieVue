@@ -1,3 +1,6 @@
+// Expose the wgl object for the html page to access
+var wglObject;
+
 // -------------------------------------------------------------------------------------------------
 // Variables for animation.
 // -------------------------------------------------------------------------------------------------
@@ -35,6 +38,7 @@ function main() {
 
     const gl = WebGLDebugUtils.makeDebugContext(createGLContext(canvas)); // Init the GL context
     const wgl = {}; // The object to hold all web gl information
+    wglObject = wgl; // Expose the web gl object to the inner html
     wgl.fpsCounter = document.getElementById("fps"); // The FPS counter
     wgl.viewingItem = document.getElementById("viewingItem"); // The viewed item indicator
     wgl.viewingItem.innerHTML = selectedObjText[selectedObj];
@@ -134,8 +138,23 @@ function createGLContext(canvas) {
         alert("Unable to initialize WebGL.");
         return;
     }
+
     context.viewportWidth  = canvas.width;
     context.viewportHeight = canvas.height;
+
+    // Resize the canvas properly
+    function resizeCanvas() {
+        // Resize the canvas
+        var glcanvas = document.getElementById("glcanvas");
+        var canvasContainer = document.getElementById("canvasContainer");
+        glcanvas.width = canvasContainer.clientWidth;
+        glcanvas.height = glcanvas.width; // 1:1 aspect ratio
+        // Resize the viewport
+        context.viewportWidth  = glcanvas.width;
+        context.viewportHeight = glcanvas.height;
+    }
+    window.addEventListener('resize', resizeCanvas, false);
+
     return context;
 }
 
@@ -890,6 +909,19 @@ function switchObj(wgl, incr) {
         selectedObj = is4d.length - 1;
     } else if (selectedObj >= is4d.length) {
         selectedObj = 0;
+    }
+    wgl.viewingItem.innerHTML = selectedObjText[selectedObj];
+}
+
+// -------------------------------------------------------------------------------------------------
+// Select the specified object. Can be called by html elements.
+// -------------------------------------------------------------------------------------------------
+function selectObj(wgl, obj) {
+    selectedObj = obj;
+    if (selectedObj < 0) {
+        selectedObj = 0
+    } else if (selectedObj >= is4d.length) {
+        selectedObj = is4d.length - 1;;
     }
     wgl.viewingItem.innerHTML = selectedObjText[selectedObj];
 }
