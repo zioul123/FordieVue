@@ -110,7 +110,7 @@
             // View the tab that is selected. Only filter based on the contentString and linkString,
             // so to filter controls tabs, "controltabcontent" and "controltablinks" are used,
             // and for explanation tabs, "explanationtabcontent" and "explanationtablinks" are used.
-            function viewControls(evt, buttonName, contentString, linkString) {
+            function viewTab(evt, buttonName, contentString, linkString) {
                 // Declare all variables
                 var i, tabcontent, tablinks;
                 // Get all elements with class="tabcontent" and hide them
@@ -141,39 +141,90 @@
         </div>
         <div class="row">
             <!-- LEFT COLUMN: WRITEUP -->
-            <div class="column" style="padding: 70px 0">
-                <h2 id="ControlsText">Understanding the Fourth Dimension</h2>
+            <div class="column" style="padding: 0px 0">
+                <h2 id="ControlsText" class="alignedCenter">Understanding the Fourth Dimension</h2>
+                <!-- Explanation tabs -->
                 <div class="tab">
-                    <button class="explanationtablinks" onclick="viewControls(event, 'Hypercube', 'explanationtabcont', 'explanationtablinks')" id="defaultOpenExplanation">Hypercube</button> 
-                    <button class="explanationtablinks" onclick="viewControls(event, 'Projection', 'explanationtabcont', 'explanationtablinks')">Projection</button>
+                    <button class="explanationtablinks" onclick="viewTab(event, 'QuickStart', 'explanationtabcont', 'explanationtablinks')" id="defaultOpenExplanation">Quick Start</button> 
+                    <button class="explanationtablinks" onclick="viewTab(event, 'Hypercube', 'explanationtabcont', 'explanationtablinks')">Hypercube</button>
+                    <button class="explanationtablinks" onclick="viewTab(event, 'FourthDimension', 'explanationtabcont', 'explanationtablinks')">Fourth Dimension</button>
+                </div><div class="tab">
+                    <button class="explanationtablinks" onclick="viewTab(event, 'Projection', 'explanationtabcont', 'explanationtablinks')">Projection</button>
+                    <button class="explanationtablinks" onclick="viewTab(event, 'Rotation', 'explanationtabcont', 'explanationtablinks')">Rotation</button>
+                    <button class="explanationtablinks" onclick="viewTab(event, 'FinalNotes', 'explanationtabcont', 'explanationtablinks')">Final Notes</button>
                 </div>
-                <!-- Controls tab content -->
-                <div id="Hypercube" class="explanationtabcont" style="display: block;">
+                <!-- Explanation tab content -->
+                <div id="QuickStart" class="explanationtabcont" style="display: block;">
                     <div class="container">
-                        <p>This is a hypercube!</p>
+                        <p>Welcome to my tesseract viewer! In the center you'll find the viewer, on the right you'll find the controls, and on this tab are the instructions and explanation behind the tesseract viewer.</p>
+                        <p>Some quick start tips: </p>
+                        <ul>
+                            <li>Press R to reset the view, which is very useful when you're trying to understand a rotation</li>
+                            <li>Press space to disable the red/cyan 3d mode if you don't have 3d glasses (who does these days)</li>
+                            <li>Plane rotations don't make much sense visually on their own; I recommend using the following double rotations: &lt;right/left + i/k&gt;, &lt;up/down + j/l&gt;, &lt;w/s + a/d&gt;</li>
+                            <li>If you're not able to see the cube rotation (e.g. it looks wonky to your eyes), reset the view (R) and calibrate your mind by visualizing the cube again, focusing on the fact that the corners with the largest points are the closest to you. Stick to simple rotations with the arrow keys and A/D first, before doing plane rotations</li>
+                        </ul>
+                        <p>For a detailed explanation, press the above tabs for a walkthrough of how to interpret the fourth spatial dimension!</p>
                     </div>
                 </div>
-                <div id="Projection" class="explanationtabcont"> 
+                <div id="Hypercube" class="explanationtabcont" style="display: none;"> 
                     <div class="container">
-                        <p>Projection in 3d works like this: </p>
+                        <p>What exactly is the hypercube? Here's a simple way to think about it.</p>
+                        <p>In 0 dimensions, what we have are points. If we connect two points, separated in the x-direction we get a <a href="#" onclick="javascript:selectObj(wglObject, 0);resetCamera(wglObject);">[1D line]</a>.</p>
+                        <p>Connect the two tips of a line with another line that's separated in the y-direction, and we get a <a href="#" onclick="javascript:selectObj(wglObject, 1);resetCamera(wglObject);">[2D square]</a>.</p>
+                        <p>Connect every corner of one square to another separated in the z-direction, and we get a <a href="#" onclick="javascript:selectObj(wglObject, 2);resetCamera(wglObject);">[3D cube]</a>.</p>
+                        <p>Finally, we get to the wonky case. Take a cube and another cube, separated in the ethereal <i>w-direction</i>, and connect each corner to their corresponding corners, and we get a <a href="#" onclick="javascript:selectObj(wglObject, 3);resetCamera(wglObject);">[4D hypercube/tesseract]</a>!</p>
+                        <p>If you don't get that last step, that's normal; lets try to understand what this "4th dimension" is!</p>
+                    </div>  
+                </div>
+                <div id="FourthDimension" class="explanationtabcont" style="display: none;"> 
+                    <div class="container">
+                        <p>What is the fourth dimension? A common answer might be "it's time!" That's not wrong; when we say "four dimensional", it can refer to anything that requires four numbers to describe an object's size or location. What this viewer does however, is to visualize a fourth <i>spatial</i> dimension that extends our 3d space, in an analogous way that our three dimensional space extends two dimensions. </p>
+                        <p>So, we treat coordinates as having a length, depth, height, and "depth in the fourth dimension", which I'll just call "w distance" for short. So things that are in "our 3d space" have a w distance of 0, things further away in the ethereal fourth dimension will have a larger w value, and things closer in the fourth dimension will have a smaller w value. (for this visualization, the unit hypercube has a central w depth of 5, so the nearest vertices have w of 4, and the furthest have w of 6)</p>
+                        <p>But we can't really see this w dimension, since it's in some ethereal space outside of our three dimensions, so how do we visualize it? We do it by projecting the four dimensional hypercube into three dimensions, and project this "3d shadow" on our screens!</p>
+                    </div>  
+                </div>
+                <div id="Projection" class="explanationtabcont" style="display: none;"> 
+                    <div class="container">
+                        <p>To understand how we project the 4d cube into three dimensions, we can draw an analogy from how we visualize 3d objects on our 2d screen. <a href="#" onclick="javascript:selectObj(wglObject, 2);resetCamera(wglObject);">[Click here to view the 3d cube object]</a>.</p>
+                        <p>Observe how the near points appear "larger" than the further points. In other words, even though it is a unit cube where the x and y values are equivalent, (let the x-axis be along the length of your screen and the y-axis along the height) the <i>projected</i> x and y values of the further vertices are shrunken. In fact, they are divided by the distance from the camera, and hence the projected x and y values of coordinates with greater z values (where higher z means deeper into the screen) are smaller than those with smaller z values, even though they have the same actual x and y values.</p>
+                        <p>In essence, things that are twice as far away appear half as big. That's the essence of projection from 3d space to 2d; divide x and y values by the z distance, and we have projection onto our screens!</p>
+                        <p>That is exactly how we represent the ethereal fourth dimension. To display our points in 3d space, we divide all x, y and z coordinates by their w distance from the camera. Things that are further away in the w direction just appear shrunken! So that inner cube in the <a href="#" onclick="javascript:selectObj(wglObject, 3);resetCamera(wglObject);">[hypercube]</a> may look smaller, but it's the same size, just further away in the w direction! 
+                    </div>  
+                </div>
+                <div id="Rotation" class="explanationtabcont" style="display: none;"> 
+                    <div class="container">
+                        <p>The next concept to understand in the fourth dimension is rotation. In <a href="#" onclick="javascript:selectObj(wglObject, 1);resetCamera(wglObject);">[2d]</a>, we can only truly rotate about a single point (press A/D). In <a href="#" onclick="javascript:selectObj(wglObject, 2);resetCamera(wglObject);">[3d]</a>, we can rotate about an <i>axis</i>. If you press Left/Right, you rotate the cube about its y-axis. What this rotation means is that the x values and z values vary from -1 to 1, but y values are <b>constant</b>. Similarly, rotation about the z-axis (A/D) means that z-values are constant as x and y vary, while rotation about the x-axis (up/down) means that x values are constant, while y and z values vary.</p>
+                        <p>One small observation to take note of is that when rotating about an axis, e.g. the x-axis, the x values still <i>appear</i> to vary. They only appear so because their z values are changing, which changes their <i>scaling</i> (as explained in <a href="#" onclick="javascript:viewTab(event, 'Projection', 'explanationtabcont', 'explanationtablinks')" id="defaultOpenExplanation"">[projection]</a>).</p>
+                        <p>Now, in the fourth dimension, we move up one more level. 2d objects rotate about points, 3d objects rotate about axes, while 4d objects rotate about <i>planes</i>. That's weird, but all this means is that 2 values will be fixed (along the plane), while 2 values change! <a href="#" onclick="javascript:selectObj(wglObject, 3);resetCamera(wglObject);">[Reset the view of the 4d cube]</a>, and try out a rotation about a plane. Visualize the fact that even though it looks like certain values are changing, it could simply be because of the w value's projection effect! (recall that the inner cube is the <b>same size</b> as the outer cube) </p>
+                    </div>  
+                </div>
+                <div id="FinalNotes" class="explanationtabcont" style="display: none;"> 
+                    <div class="container">
+                        <p>Hopefully, after reading all that, you have a better understanding of the canonical view of the hypercube/tesseract! There are some final things that are worth taking note of.</p>
+                        <ul>
+                            <li>When describing the hypercube, I may have made it sound like there are only two cubes; an inner and outer cube. But in fact, there are 6 cubes that make up the tesseract. Where are the other 4? Those trapezoidal shapes that connect the outer cube and the inner cube are also cubes, but they look skewed because they have different w values.</li>
+                            <li>In my controls menu, I called rotations about the x-w, y-w and z-w planes rotations about the x, y and z-axes, because these are simpler to understand, but that's what they really are, rotations about x/y/z as well as w, which just means w is constant, which is equivalent to a 3d rotation.</li>
+                        </ul>
+                        <p>For those interested in the technology, this visualizer was made using raw WebGL. You may view the <a href="https://github.com/zioul123/FordieVue">[source code here]</a>.</p>
                     </div>  
                 </div>
             </div>
             <!-- MIDDLE COLUMN: CUBE -->
             <div class="column" id="canvasContainer">
-                <h2 id="viewingItem">--</h2>
+                <h2 id="viewingItem" class="alignedCenter">--</h2>
                 <canvas id="glcanvas" width="640" height="640" style="width:100%; height:auto; outline: white 3px solid;"></canvas>
                 <div class="centered" style = "margin: .67em 0 ">FPS: <span id="fps">--</span></div>
                 <p></p>
-                <a href="https://github.com/zioul123/FordieVue">[Source Code]</a>
+                <p class="alignedCenter"><a href="https://github.com/zioul123/FordieVue">[Source Code]</a></p>
             </div>
             <!-- RIGHT COLUMN: CONTROLS -->
-            <div class="column" style="padding: 70px 0">
-                <h2 id="ControlsText">Controls</h2>
+            <div class="column" style="padding: 0px 0">
+                <h2 id="ControlsText" class="alignedCenter">Controls</h2>
                 <!-- Controls tabs -->
                 <div class="tab">
-                    <button class="controltablinks" onclick="viewControls(event, 'Keyboard', 'controltabcont', 'controltablinks')" id="defaultOpenControls">Keyboard</button> 
-                    <button class="controltablinks" onclick="viewControls(event, 'Controller', 'controltabcont', 'controltablinks')">Controller</button>
+                    <button class="controltablinks" onclick="viewTab(event, 'Keyboard', 'controltabcont', 'controltablinks')" id="defaultOpenControls">Keyboard</button> 
+                    <button class="controltablinks" onclick="viewTab(event, 'Controller', 'controltabcont', 'controltablinks')">Controller</button>
                 </div>
                 <!-- Controls tab content -->
                 <div id="Keyboard" class="controltabcont" style="display: block;">
@@ -222,7 +273,7 @@
                         </tr>
                         <tr>
                             <td align="center">Rotate About YZ-Plane</td>
-                            <td align="center">j/k</td> 
+                            <td align="center">j/l</td> 
                         </tr>
                     </table>
                     </div>
