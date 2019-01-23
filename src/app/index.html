@@ -18,10 +18,13 @@
              */
             * {
                 box-sizing: border-box;
-                text-align: center;
                 color: white;
                 font-weight: lighter;
                 font-family: "Lucida Sans Unicode", "Lucida Grande", sans-serif
+            }
+
+            .alignedCenter {
+                text-align: center;
             }
 
             /* Create three equal columns that floats next to each other */
@@ -45,6 +48,7 @@
             .container {
               width: 100%;
               margin: 0 auto;
+              text-align: left
             }
 
             /* 
@@ -53,6 +57,7 @@
             /* Style the tab */
             .tab {
                 overflow: hidden;
+                text-align: center;
                 background-color: #000000;
             }
 
@@ -62,8 +67,8 @@
                 float: center;
                 color: white;
                 border: none;
-                font-size: 16px;
                 outline: none;
+                text-align: center;
                 cursor: pointer;
                 padding: 14px 16px;
                 transition: 0.3s;
@@ -79,11 +84,26 @@
                 background-color: #333333;
             }
 
+            .controltablinks {
+                font-size: 16px;
+            }
+
+            .explanationtablinks {
+                font-size: 12px;
+            }
+
             /* Style the tab content */
-            .tabcontent {
+            .controltabcont {
                 display: none;
                 padding: 6px 12px;
                 border-top: none;
+            }
+
+            .explanationtabcont {
+                display: none;
+                padding: 6px 12px;
+                border-top: none;
+                font-size: 12px;
             }
         </style>
         <script>
@@ -161,48 +181,48 @@
                         <br>
                     <table style="width:100%">
                         <tr>
-                            <th><i>Function</i></th>
-                            <th><i>Keys</i></th> 
+                            <th align="center"><i>Function</i></th>
+                            <th align="center"><i>Keys</i></th> 
                         </tr>
                         <tr>
-                            <td>Toggle 3d Anaglyph</td>
-                            <td>Spacebar</td> 
+                            <td align="center">Toggle 3d Anaglyph</td>
+                            <td align="center">Spacebar</td> 
                         </tr>
                         <tr>
-                            <td>View Other Shapes</td>
-                            <td>Shift/Ctrl</td> 
+                            <td align="center">View Other Shapes</td>
+                            <td align="center">Shift/Ctrl</td> 
                         </tr>
                         <tr>
-                            <td>Zoom In/Out</td>
-                            <td>x/z</td> 
+                            <td align="center">Zoom In/Out</td>
+                            <td align="center">x/z</td> 
                         </tr>
                         <tr>
-                            <td>Reset Cube</td>
-                            <td>r</td> 
+                            <td align="center">Reset Cube</td>
+                            <td align="center">r</td> 
                         </tr>
                         <tr>
-                            <td>Rotate About X-Axis</td>
-                            <td>Up/Down Arrow Keys</td> 
+                            <td align="center">Rotate About X-Axis</td>
+                            <td align="center">Up/Down Arrow Keys</td> 
                         </tr>
                         <tr>
-                            <td>Rotate About Y-Axis</td>
-                            <td>Left/Right Arrow Keys</td> 
+                            <td align="center">Rotate About Y-Axis</td>
+                            <td align="center">Left/Right Arrow Keys</td> 
                         </tr>
                         <tr>
-                            <td>Rotate about Z-Axis</td>
-                            <td>a/d</td> 
+                            <td align="center">Rotate about Z-Axis</td>
+                            <td align="center">a/d</td> 
                         </tr>
                         <tr>
-                            <td>Rotate About XY-Plane</td>
-                            <td>w/s</td> 
+                            <td align="center">Rotate About XY-Plane</td>
+                            <td align="center">w/s</td> 
                         </tr>
                         <tr>
-                            <td>Rotate About XZ-Plane</td>
-                            <td>i/j</td> 
+                            <td align="center">Rotate About XZ-Plane</td>
+                            <td align="center">i/j</td> 
                         </tr>
                         <tr>
-                            <td>Rotate About YZ-Plane</td>
-                            <td>j/k</td> 
+                            <td align="center">Rotate About YZ-Plane</td>
+                            <td align="center">j/k</td> 
                         </tr>
                     </table>
                     </div>
